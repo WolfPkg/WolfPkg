@@ -1,0 +1,73 @@
+Source: foma
+Section: science
+Priority: optional
+Maintainer: Debian Science Team <debian-science-maintainers@alioth-lists.debian.net>
+Uploaders: Tino Didriksen <mail@tinodidriksen.com>,
+           Timo Jyrinki <timo@debian.org>,
+           Kartik Mistry <kartik@debian.org>
+Build-Depends: bison,
+               debhelper (>= 9.0),
+               flex,
+               libreadline-dev,
+               libtinfo-dev,
+               libtool,
+               zlib1g-dev
+Standards-Version: 4.5.1
+Homepage: https://fomafst.github.io/
+Vcs-Git: https://salsa.debian.org/science-team/foma.git
+Vcs-Browser: https://salsa.debian.org/science-team/foma
+Rules-Requires-Root: no
+
+Package: foma
+Architecture: any
+Depends: libfoma0 (= ${binary:Version}), ${misc:Depends}, ${shlibs:Depends}
+Breaks: foma-bin (<< 1:0)
+Replaces: foma-bin (<< 1:0)
+Description: Tools for constructing various finite-state automata
+ Compiler, programming language, and C library for
+ constructing finite-state automata and transducers for
+ various uses.
+
+Package: libfoma0
+Architecture: any
+Section: libs
+Multi-Arch: same
+Pre-Depends: ${misc:Pre-Depends}
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Description: Foma runtime libraries
+ Compiler, programming language, and C library for
+ constructing finite-state automata and transducers for
+ various uses.
+ .
+ This package provides runtime libraries for foma.
+
+Package: libfoma-dev
+Architecture: any
+Pre-Depends: ${misc:Pre-Depends}
+Depends: libfoma0 (= ${binary:Version}), ${misc:Depends}
+Breaks: libfoma0-dev (<< 1:0.10.0)
+Replaces: libfoma0-dev (<< 1:0.10.0)
+Section: libdevel
+Description: Foma development files
+ Compiler, programming language, and C library for
+ constructing finite-state automata and transducers for
+ various uses.
+ .
+ This package provides development headers and libraries
+ for foma.
+
+Package: foma-bin
+Architecture: all
+Depends: foma (>= ${source:Version}), ${misc:Depends}
+Section: oldlibs
+Description: Transitional package for foma
+ This is dummy transitional package for foma. It can be
+ safely remove.
+
+Package: libfoma0-dev
+Architecture: all
+Depends: libfoma-dev (>= ${source:Version}), ${misc:Depends}
+Section: oldlibs
+Description: Transitional package for libfoma-dev
+ This is dummy transitional package for libfoma-dev. It can
+ be safely remove.

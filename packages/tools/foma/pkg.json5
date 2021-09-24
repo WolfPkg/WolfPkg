@@ -1,0 +1,7 @@
+{
+	source: 'https://github.com/mhulden/foma/trunk/foma',
+	version_in: 'Makefile',
+	excludes: [
+		'*/',
+		],
+}

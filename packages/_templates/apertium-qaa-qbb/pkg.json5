@@ -1,0 +1,6 @@
+{
+	source: 'https://github.com/apertium/apertium-qaa-qab',
+	excludes: [
+		'*/',
+		],
+}
