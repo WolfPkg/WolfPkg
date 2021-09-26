@@ -1,6 +1,6 @@
 {
 	"require": {
-		"colinodell/json5": "^2.2.0",
-		"tdc/pdo": "^1.2.0"
+		"colinodell/json5": "^2",
+		"tdc/pdo": "^1"
     }
 }

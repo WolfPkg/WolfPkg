@@ -5,7 +5,7 @@ require_once __DIR__.'/../lib/autoconf.php';
 
 chdir($_ENV['WOLFPKG_ROOT']);
 
-$db = \Db\get();
+$db = \Db\open();
 
 $exps = [];
 $stm = $db->prepexec("SELECT p_id, p_name, p_path, p_mtime, p_chash FROM packages");
@@ -25,13 +25,12 @@ foreach ($pkgs as $path => $pkname) {
 	$conf = \Pkg\load_conf($cpath, $pkname);
 
 	if (!$conf['enabled']) {
-		printf("Disabled: %s\n", $pkname);
+		printf("Skipped (disabled): %s\n", $pkname);
+		unset($pkgs[$path]);
 		continue;
 	}
 
 	$mtime = filemtime($cpath);
-	$data = var_export($conf, true);
-	$chash = \Utils\sha256_b64x($data);
 
 	$todo = false;
 	if (!array_key_exists($pkname, $exps)) {
@@ -46,7 +45,14 @@ foreach ($pkgs as $path => $pkname) {
 		echo "New: {$pkname}\n";
 		$todo = true;
 	}
-	else if ($exps[$pkname]['p_mtime'] !== $mtime || $exps[$pkname]['p_chash'] !== $chash) {
+	else if ($exps[$pkname]['p_mtime'] === $mtime) {
+		echo "Skipped (mtime): {$pkname}\n";
+		continue;
+	}
+
+	$data = var_export($conf, true);
+	$chash = \Utils\b64_enx(\Utils\sha256($data));
+	if ($exps[$pkname]['p_chash'] !== $chash) {
 		$upd->execute([$path, $mtime, $chash]);
 		$exps[$pkname]['p_path'] = $path;
 		$exps[$pkname]['p_mtime'] = $mtime;
@@ -55,6 +61,21 @@ foreach ($pkgs as $path => $pkname) {
 		$todo = true;
 	}
 	echo var_export($exps[$pkname], true), "\n";
+}
+
+foreach ($pkgs as $path => $pkname) {
+	foreach (['debian', 'rpm', 'macos', 'windows', 'scan-build'] as $kind) {
+		if (!is_dir("{$path}/{$kind}")) {
+			continue;
+		}
+		$fs = explode("\n", trim(shell_exec("find '{$path}/{$kind}' -not -type d | LC_ALL=C sort")));
+
+		$mtime = 0;
+		foreach ($fs as $k => $f) {
+			$fs[$k] = realpath($f);
+			$mtime = max($mtime, filemtime($fs[$k]));
+		}
+	}
 }
 
 $db->commit();

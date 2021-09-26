@@ -13,7 +13,7 @@ function enum_packages() {
 	return $pkgs;
 }
 
-function parse_conf($j5, $pkname, $raw=false) {
+function parse_conf($j5, $pkname, $raw = false) {
 	$conf = json5_decode($j5, true);
 	if (!$raw) {
 		$def = [
@@ -21,7 +21,7 @@ function parse_conf($j5, $pkname, $raw=false) {
 			'vcs' => 'git',
 			'version_in' => 'configure.ac',
 			'excludes' => [],
-			'nobuild' => [],
+			'non_targets' => [],
 			'enabled' => true,
 			];
 
@@ -38,6 +38,6 @@ function parse_conf($j5, $pkname, $raw=false) {
 	return $conf;
 }
 
-function load_conf($path, $pkname, $raw=false) {
+function load_conf($path, $pkname, $raw = false) {
 	return parse_conf(file_get_contents($path), $pkname, $raw);
 }

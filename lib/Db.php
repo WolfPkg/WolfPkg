@@ -1,7 +1,7 @@
 <?php
 namespace Db;
 
-function get($read_only = false) {
+function open($read_only = false) {
 	$db_file = $_ENV['WOLFPKG_WORKDIR'].'/wolfpkg.sqlite';
 	$existed = file_exists($db_file);
 
@@ -28,19 +28,41 @@ function get($read_only = false) {
 			p_id INTEGER NOT NULL,
 			p_name TEXT NOT NULL UNIQUE,
 			p_path TEXT NOT NULL,
+			p_url TEXT NOT NULL,
 			p_mtime INTEGER NOT NULL,
 			p_chash TEXT NOT NULL,
+			p_bdeps TEXT NOT NULL,
+			p_bdeps_trans TEXT NOT NULL,
 			PRIMARY KEY(p_id AUTOINCREMENT)
 			)");
 		$db->exec("CREATE TABLE sources (
 			p_id INTEGER NOT NULL,
-			s_id TEXT NOT NULL,
+			s_rev TEXT NOT NULL,
 			s_stamp INTEGER NOT NULL,
 			s_version TEXT NOT NULL,
-			PRIMARY KEY(p_id, s_id),
-			FOREIGN KEY(p_id) REFERENCES packages(p_id) ON DELETE CASCADE
+			s_thash TEXT NOT NULL,
+			PRIMARY KEY(p_id, s_rev),
+			FOREIGN KEY(p_id) REFERENCES packages(p_id) ON UPDATE CASCADE ON DELETE CASCADE
 			) WITHOUT ROWID");
-		chmod($db_file, 0600);
+		$db->exec("CREATE TABLE package_targets (
+			p_id INTEGER NOT NULL,
+			t_id INTEGER NOT NULL, # maybe not integer
+			s_thash TEXT NOT NULL,
+			PRIMARY KEY(p_id, t_id, s_thash),
+			FOREIGN KEY(p_id) REFERENCES packages(p_id) ON UPDATE CASCADE ON DELETE CASCADE,
+			FOREIGN KEY(s_thash) REFERENCES sources(s_thash) ON UPDATE CASCADE ON DELETE RESTRICT
+			) WITHOUT ROWID");
+		$db->exec("CREATE TABLE published (
+			p_id INTEGER NOT NULL,
+			k_kind INTEGER NOT NULL,
+			s_thash TEXT NOT NULL,
+			s_version TEXT NOT NULL,
+			b_binaries TEXT NOT NULL,
+			PRIMARY KEY(p_id, k_kind, s_thash),
+			FOREIGN KEY(p_id) REFERENCES packages(p_id) ON UPDATE CASCADE ON DELETE CASCADE,
+			FOREIGN KEY(s_thash) REFERENCES sources(s_thash) ON UPDATE CASCADE ON DELETE RESTRICT
+			) WITHOUT ROWID");
+		chmod($db_file, 0664);
 	}
 
 	return $db;
