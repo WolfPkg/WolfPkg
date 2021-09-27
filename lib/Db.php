@@ -12,13 +12,13 @@ function open($read_only = false) {
 	$db = new \TDC\PDO\SQLite($db_file, $opts);
 
 	if (!$read_only) {
-		$db->exec("PRAGMA auto_vacuum = NONE");
+		$db->exec("PRAGMA auto_vacuum = INCREMENTAL");
 	}
 	$db->exec("PRAGMA case_sensitive_like = ON");
 	$db->exec("PRAGMA foreign_keys = ON");
-	$db->exec("PRAGMA journal_mode = MEMORY");
+	$db->exec("PRAGMA journal_mode = WAL");
 	$db->exec("PRAGMA locking_mode = EXCLUSIVE");
-	$db->exec("PRAGMA synchronous = OFF");
+	$db->exec("PRAGMA synchronous = NORMAL");
 	$db->exec("PRAGMA threads = 4");
 	$db->exec("PRAGMA trusted_schema = OFF");
 
@@ -37,10 +37,12 @@ function open($read_only = false) {
 			)");
 		$db->exec("CREATE TABLE sources (
 			p_id INTEGER NOT NULL,
+			# Needs cadence/whatis
 			s_rev TEXT NOT NULL,
-			s_stamp INTEGER NOT NULL,
-			s_version TEXT NOT NULL,
+			s_mtime INTEGER NOT NULL,
+			# s_version TEXT NOT NULL,
 			s_thash TEXT NOT NULL,
+			s_stamp INTEGER NOT NULL,
 			PRIMARY KEY(p_id, s_rev),
 			FOREIGN KEY(p_id) REFERENCES packages(p_id) ON UPDATE CASCADE ON DELETE CASCADE
 			) WITHOUT ROWID");

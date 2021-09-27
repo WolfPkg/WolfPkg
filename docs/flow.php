@@ -30,7 +30,7 @@ case 'check-control':
 	}
 	if ($todo) {
 		if (mirror_source()) {
-			regen_tarball();
+			gen_tarball();
 		}
 		foreach ($todo as $kind) {
 			queue_prebuild($kind);
@@ -39,19 +39,24 @@ case 'check-control':
 	break;
 case 'nightly':
 	if (mirror_source()) {
-		regen_tarball();
+		gen_tarball();
 		check_source();
 	}
 	break;
 case 'push':
-	mirror_source();
-	if (!check_source()) {
-		build_single();
+	if (mirror_source() != $pushed) {
+		gen_tarball($head);
+		check_source($head);
+	}
+	else {
+		gen_tarball($pushed);
+		build_single($pushed);
 	}
 	break;
 case 'pr':
 	mirror_source();
-	build_single();
+	gen_tarball($pr, $diff);
+	build_single($pr);
 	break;
 case 'dep':
 	break;
