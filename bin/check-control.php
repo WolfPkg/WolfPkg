@@ -19,6 +19,7 @@ $db->beginTransaction();
 $ins = $db->prepare("INSERT INTO packages (p_name, p_path, p_mtime, p_chash) VALUES (:p_name, :p_path, :p_mtime, :p_chash)");
 $upd = $db->prepare("UPDATE packages SET p_path = ?, p_mtime = ?, p_chash = ?");
 
+$todo = [];
 $pkgs = \Pkg\enum_packages();
 foreach ($pkgs as $path => $pkname) {
 	$cpath = "{$path}/pkg.json5";
@@ -32,7 +33,6 @@ foreach ($pkgs as $path => $pkname) {
 
 	$mtime = filemtime($cpath);
 
-	$todo = false;
 	if (!array_key_exists($pkname, $exps)) {
 		$exps[$pkname] = [
 			'p_name' => $pkname,
@@ -43,9 +43,11 @@ foreach ($pkgs as $path => $pkname) {
 		$ins->execute($exps[$pkname]);
 		$exps[$pkname]['p_id'] = intval($db->lastInsertId());
 		echo "New: {$pkname}\n";
-		$todo = true;
+		$todo[] = $conf;
+		continue;
 	}
-	else if ($exps[$pkname]['p_mtime'] === $mtime) {
+
+	if ($exps[$pkname]['p_mtime'] === $mtime) {
 		echo "Skipped (mtime): {$pkname}\n";
 		continue;
 	}
@@ -58,7 +60,10 @@ foreach ($pkgs as $path => $pkname) {
 		$exps[$pkname]['p_mtime'] = $mtime;
 		$exps[$pkname]['p_chash'] = $chash;
 		echo "Changed: {$pkname}\n";
-		$todo = true;
+		$todo[] = $conf;
+	}
+	else {
+		echo "Skipped (hash): {$pkname}\n";
 	}
 	echo var_export($exps[$pkname], true), "\n";
 }

@@ -17,6 +17,7 @@ function parse_conf($j5, $pkname, $raw = false) {
 	$conf = json5_decode($j5, true);
 	if (!$raw) {
 		$def = [
+			'name' => $pkname,
 			'source' => $conf['source'] ?? "https://github.com/apertium/{$pkname}",
 			'vcs' => 'git',
 			'version_in' => 'configure.ac',
