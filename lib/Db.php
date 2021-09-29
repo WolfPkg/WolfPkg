@@ -1,9 +1,14 @@
 <?php
 namespace Db;
 
-function open($read_only = false) {
+function get($read_only = false) {
+	$which = "-wolfpkg-db-handle-{$read_only}";
+	if (!empty($GLOBALS[$which])) {
+		return $GLOBALS[$which];
+	}
+
 	$db_file = $_ENV['WOLFPKG_WORKDIR'].'/wolfpkg.sqlite';
-	$existed = file_exists($db_file);
+	$existed = file_exists($db_file) && (filesize($db_file) > 4096);
 
 	$opts = [];
 	if ($read_only) {
@@ -24,23 +29,14 @@ function open($read_only = false) {
 
 	if (!$existed) {
 		printf("Creating SQLite database %s\n", $db_file);
-		$db->exec("CREATE TABLE packages (
-			p_id INTEGER NOT NULL,
-			p_name TEXT NOT NULL UNIQUE,
-			p_path TEXT NOT NULL,
-			p_url TEXT NOT NULL,
-			p_mtime INTEGER NOT NULL,
-			p_chash TEXT NOT NULL,
-			p_bdeps TEXT NOT NULL,
-			p_bdeps_trans TEXT NOT NULL,
-			PRIMARY KEY(p_id AUTOINCREMENT)
-			)");
+		$db->exec(file_get_contents($_ENV['WOLFPKG_ROOT'].'/lib/schema.sql'));
+		/*
 		$db->exec("CREATE TABLE sources (
 			p_id INTEGER NOT NULL,
-			# Needs cadence/whatis
+			-- Needs cadence/whatis
 			s_rev TEXT NOT NULL,
 			s_mtime INTEGER NOT NULL,
-			# s_version TEXT NOT NULL,
+			-- s_version TEXT NOT NULL,
 			s_thash TEXT NOT NULL,
 			s_stamp INTEGER NOT NULL,
 			PRIMARY KEY(p_id, s_rev),
@@ -48,7 +44,7 @@ function open($read_only = false) {
 			) WITHOUT ROWID");
 		$db->exec("CREATE TABLE package_targets (
 			p_id INTEGER NOT NULL,
-			t_id INTEGER NOT NULL, # maybe not integer
+			t_id INTEGER NOT NULL, -- maybe not integer
 			s_thash TEXT NOT NULL,
 			PRIMARY KEY(p_id, t_id, s_thash),
 			FOREIGN KEY(p_id) REFERENCES packages(p_id) ON UPDATE CASCADE ON DELETE CASCADE,
@@ -64,8 +60,18 @@ function open($read_only = false) {
 			FOREIGN KEY(p_id) REFERENCES packages(p_id) ON UPDATE CASCADE ON DELETE CASCADE,
 			FOREIGN KEY(s_thash) REFERENCES sources(s_thash) ON UPDATE CASCADE ON DELETE RESTRICT
 			) WITHOUT ROWID");
+		//*/
 		chmod($db_file, 0664);
 	}
 
+	$GLOBALS[$which] = $db;
 	return $db;
+}
+
+function get_rw() {
+	return get(false);
+}
+
+function get_ro() {
+	return get(true);
 }

@@ -1,0 +1,141 @@
+apertium-fra-cat (1.9.0-1) unstable; urgency=low
+
+  * New upstream release
+  * Bundles apertium-fra 1.9.0 and apertium-cat 2.10.0
+
+ -- Tino Didriksen <tino@didriksen.cc>  Wed, 03 Jun 2020 16:47:08 +0200
+
+apertium-fra-cat (1.8.0-1) unstable; urgency=low
+
+  [ Tino Didriksen ]
+  * New upstream release
+  * Bundles apertium-fra 1.8.0 and apertium-cat 2.9.0
+
+  [ Kartik Mistry ]
+  * debian/control:
+    + Updated Standards-Version to 4.5.0
+    + Switched to debhelper-compat.
+    + Added 'Rules-Requires-Root' field.
+  * Added debian/upstream/metadata file.
+
+ -- Kartik Mistry <kartik@debian.org>  Thu, 26 Mar 2020 21:06:21 +0530
+
+apertium-fra-cat (1.7.0-1) unstable; urgency=low
+
+  [ Tino Didriksen ]
+  * New upstream release:
+    + Bundles apertium-fra 1.7.0 and apertium-cat 2.8.0
+  * debian/control:
+    + Updated Standards-Version to 4.4.1
+  * Updated dh to 12.
+
+  [ Kartik Mistry ]
+  * Added debian/gitlab-ci.yml.
+  * Fixed debian/copyright.
+
+ -- Kartik Mistry <kartik@debian.org>  Thu, 28 Nov 2019 11:10:43 +0100
+
+apertium-fra-cat (1.5.0-1) unstable; urgency=low
+
+  [ Tino Didriksen ]
+  * Update to latest upstream release.
+  * debian/control:
+    + Updated Standards-Version to 4.2.1
+    + Updated Depends and Build-Depends
+  * Updated dh to 11.
+
+ -- Kartik Mistry <kartik@debian.org>  Tue, 16 Oct 2018 08:08:55 +0530
+
+apertium-fra-cat (1.3.0~r84327-1) unstable; urgency=low
+
+  [ Tino Didriksen ]
+  * Update to latest upstream release.
+  * Undo debhelper 11 in favour of 9.
+
+  [ Kartik Mistry ]
+  * debian/control:
+    + Updated Standards-Version to 4.1.4
+    + Updated Build-Depends.
+  * Updated debian/watch file.
+
+ -- Kartik Mistry <kartik@debian.org>  Tue, 19 Jun 2018 09:06:24 +0530
+
+apertium-fra-cat (1.2.0~r78602-2) unstable; urgency=low
+
+  * debian/control:
+    + Removed old transitional package since new binary is in testing now.
+    + Updated Standards-Version to 4.1.3
+    + Updated Vcs-* URLs.
+    + Updated Build-Depends for debhelper 11 compat.
+  * Bumped debian/compat to 11.
+  * debian/copyright:
+    + Removed unused section.
+    + http->https in URLs.
+  * debian/rules:
+    + Updated to use dh 11.
+  * Updated debian/watch file.
+
+ -- Kartik Mistry <kartik@debian.org>  Tue, 30 Jan 2018 22:47:52 +0530
+
+apertium-fra-cat (1.2.0~r78602-1) unstable; urgency=low
+
+  [ Tino Didriksen ]
+  * Update to latest upstream release.
+  * Updated Standards-Version to 3.9.8
+  * Updated Build-Deps.
+
+ -- Kartik Mistry <kartik@debian.org>  Tue, 13 Jun 2017 11:36:44 +0530
+
+apertium-fra-cat (1.1.0~r64309-1) unstable; urgency=low
+
+  [ Tino Didriksen ]
+  * New upstream release
+  * Binary and source packages are renamed as per upstream naming scheme.
+
+  [ Kartik Mistry ]
+  * debian/control:
+    + Updated Standards-Version to 3.9.7 (no changes)
+  * debian/rules:
+    + Skip tests.
+
+ -- Kartik Mistry <kartik@debian.org>  Sat, 27 Feb 2016 12:34:18 +0530
+
+apertium-fr-ca (1.0.3~r61329-1) unstable; urgency=low
+
+  [ Tino Didriksen ]
+  * New upstream release
+  * Significant changes in svn since tarball, so mixing new build scripts with
+    old data files
+  * Re-done packaging to take advantage of debhelper 9
+
+  [ Kartik Mistry ]
+  * Set debian/compat to 9. Bumped dh dependency.
+  * Fixed debian/copyright.
+
+ -- Kartik Mistry <kartik@debian.org>  Fri, 31 Jul 2015 09:28:37 +0530
+
+apertium-fr-ca (1.0.2-1) unstable; urgency=low
+
+  * New upstream release
+  * Added dependency on apertium-pcre2
+
+ -- Francis Tyers <ftyers@prompsit.com>  Thu, 12 Mar 2009 20:31:32 +0000
+
+apertium-fr-ca (1.0.0-2) unstable; urgency=low
+
+  * Fixed Build-Depends (Closes: #446595)
+  * Upgrade to Apertium 3.0 (Closes: #445830)
+
+ -- Francis Tyers <ftyers@prompsit.com>  Mon, 22 Oct 2007 16:30:23 +0100
+
+apertium-fr-ca (1.0.0-1) unstable; urgency=low
+
+  * Release requires Apertium 3
+
+ -- Francis Tyers <ftyers@prompsit.com>  Fri,  5 Oct 2007 16:03:00 +0100
+
+apertium-fr-ca (0.7-1) unstable; urgency=low
+
+  * Initial release (Closes: #389229)
+
+ -- Francis Tyers <f.tyers@uea.ac.uk>  Sun, 24 Sep 2006 18:26:50 +0100

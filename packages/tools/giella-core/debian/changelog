@@ -1,0 +1,30 @@
+giella-core (0.3.7+s186347-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Tino Didriksen <tino@didriksen.cc>  Sat, 28 Dec 2019 12:20:07 +0100
+
+giella-core (0.3.1~r163221-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Tino Didriksen <tino@didriksen.cc>  Wed, 07 Feb 2018 16:10:05 +0000
+
+giella-core (0.2.37~r145117-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Tino Didriksen <tino@didriksen.cc>  Mon, 19 Dec 2016 11:37:01 +0100
+
+giella-core (0.1.0~r121148-1) unstable; urgency=low
+
+  * Old upstream release - downgrading to the version giella-sme needs
+
+ -- Tino Didriksen <tino@didriksen.cc>  Thu, 03 Mar 2016 08:45:22 +0000
+
+giella-core (0.1.1~r129227-1) unstable; urgency=low
+
+  [ Tino Didriksen ]
+  * Initial release (Closes: #814398)
+
+ -- Kartik Mistry <kartik@debian.org>  Thu, 11 Feb 2016 13:57:29 +0530

@@ -1,0 +1,7 @@
+{
+	excludes: [
+		'*/',
+		'+ dev/cjk.lexc',
+		'+ dev/spellrelax.twol',
+		],
+}

@@ -1,0 +1,11 @@
+{
+	excludes: [
+		'*/',
+		'+ m4/.*',
+		'+ python/.*',
+		'+ testing/.*',
+		'+ scripts/.*',
+		'- scripts/unused/.*',
+		'+ src/.*',
+		],
+}

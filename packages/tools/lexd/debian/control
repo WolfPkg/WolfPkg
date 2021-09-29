@@ -1,0 +1,27 @@
+Source: lexd
+Section: science
+Priority: optional
+Maintainer: Debian Science Team <debian-science-maintainers@alioth-lists.debian.net>
+Uploaders: Tino Didriksen <tino@didriksen.cc>,
+           Kartik Mistry <kartik@debian.org>
+Build-Depends: autotools-dev,
+               debhelper (>= 9),
+               dh-autoreconf,
+               hfst (>= 3.15.3),
+               libicu-dev,
+               lttoolbox-dev (>= 3.6.0),
+               pkg-config
+Standards-Version: 4.5.1
+Homepage: https://apertium.org/
+Vcs-Git: https://salsa.debian.org/science-team/lexd.git
+Vcs-Browser: https://salsa.debian.org/science-team/lexd
+Rules-Requires-Root: no
+
+Package: lexd
+Architecture: any
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Description: Lexicon compiler for non-suffixational morphologies
+ Compiles lexicons in a format loosely based on hfst-lexc and produces
+ transducers in ATT format which are equivalent to those produced using
+ the overgenerate-and-constrain approach with hfst-twolc.
+ However, it is much faster.

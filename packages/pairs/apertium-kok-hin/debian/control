@@ -1,0 +1,36 @@
+Source: apertium-kok-hin
+Section: science
+Priority: optional
+Maintainer: Debian Science Team <debian-science-maintainers@alioth-lists.debian.net>
+Uploaders: Tino Didriksen <tino@didriksen.cc>,
+           Kartik Mistry <kartik@debian.org>
+Build-Depends: apertium-anaphora (>= 1.1.0),
+               apertium-dev (>= 3.8.0),
+               apertium-hin,
+               apertium-kok,
+               apertium-lex-tools (>= 0.3.0),
+               apertium-separable (>= 0.4.0),
+               cg3-dev (>= 1.3.2),
+               debhelper (>= 12),
+               gawk,
+               pkg-config
+Standards-Version: 4.5.1
+Homepage: https://apertium.org/
+Vcs-Git: https://salsa.debian.org/science-team/apertium-kok-hin.git
+Vcs-Browser: https://salsa.debian.org/science-team/apertium-kok-hin
+Rules-Requires-Root: no
+
+Package: apertium-kok-hin
+Architecture: all
+Depends: apertium (>= 3.8.0),
+         apertium-anaphora (>= 1.1.0),
+         apertium-lex-tools (>= 0.3.0),
+         apertium-separable (>= 0.4.0),
+         cg3 (>= 1.3.2),
+         ${misc:Depends},
+         ${shlibs:Depends}
+Provides: apertium-hin-kok
+Conflicts: apertium-hin-kok
+Description: Apertium translation data for the Konkani (macrolanguage)-Hindi pair
+ Data package providing Apertium language resources for translating
+ between the Konkani (macrolanguage) and Hindi languages.

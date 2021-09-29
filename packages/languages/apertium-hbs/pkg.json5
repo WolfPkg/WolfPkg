@@ -1,0 +1,8 @@
+{
+	excludes: [
+		'*/',
+		'hbs-fine-grained.prob',
+		'hbs-semi-coarse.prob',
+		'hbs-coarse.prob',
+		],
+}

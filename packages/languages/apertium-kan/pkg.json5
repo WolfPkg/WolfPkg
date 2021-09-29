@@ -1,0 +1,6 @@
+{
+	excludes: [
+		'*/',
+		'+ corpus/kan.tagged',
+		],
+}

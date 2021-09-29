@@ -1,0 +1,6 @@
+{
+	excludes: [
+		'*/',
+		'+ dev/spellrelax.twol',
+		],
+}

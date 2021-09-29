@@ -1,0 +1,21 @@
+#!/usr/bin/make -f
+# -*- makefile -*-
+
+#export DH_VERBOSE=1
+export DH_OPTIONS
+export LC_ALL=C.UTF-8
+
+%:
+	dh $@ --fail-missing --parallel --with autoreconf
+
+override_dh_auto_configure:
+	dh_auto_configure -- --disable-static --enable-zhfst --without-libxmlpp --without-tinyxml2
+
+override_dh_auto_install:
+	dh_auto_install
+	find $(CURDIR) -type f -name '*.la' -exec rm -f '{}' \;
+
+ifeq ($(filter nocheck,$(DEB_BUILD_OPTIONS)),)
+override_dh_auto_test:
+	$(MAKE) -j1 check V=1 VERBOSE=1
+endif

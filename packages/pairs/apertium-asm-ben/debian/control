@@ -1,0 +1,28 @@
+Source: apertium-asm-ben
+Section: science
+Priority: optional
+Maintainer: Debian Science Team <debian-science-maintainers@alioth-lists.debian.net>
+Uploaders: Tino Didriksen <tino@didriksen.cc>,
+           Kartik Mistry <kartik@debian.org>
+Build-Depends: apertium-dev (>= 3.8.0),
+               apertium-lex-tools (>= 0.3.0),
+               debhelper (>= 12),
+               gawk,
+               pkg-config
+Standards-Version: 4.5.1
+Homepage: https://apertium.org/
+Vcs-Git: https://salsa.debian.org/science-team/apertium-asm-ben.git
+Vcs-Browser: https://salsa.debian.org/science-team/apertium-asm-ben
+Rules-Requires-Root: no
+
+Package: apertium-asm-ben
+Architecture: all
+Depends: apertium (>= 3.8.0),
+         apertium-lex-tools (>= 0.3.0),
+         ${misc:Depends},
+         ${shlibs:Depends}
+Provides: apertium-ben-asm
+Conflicts: apertium-ben-asm
+Description: Apertium translation data for the Assamese-Bengali pair
+ Data package providing Apertium language resources for translating
+ between the Assamese and Bengali languages.

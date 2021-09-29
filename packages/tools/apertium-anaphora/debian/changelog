@@ -1,0 +1,48 @@
+apertium-anaphora (1.0.2-1) unstable; urgency=low
+
+  * Don't search for Bash (Closes: #979134)
+
+ -- Tino Didriksen <tino@didriksen.cc>  Sun, 03 Jan 2021 13:06:03 +0100
+
+apertium-anaphora (1.0.1-1) unstable; urgency=low
+
+  * Update to latest upstream
+  * Changed build system from CMake to autotools
+  * debian/control:
+    + Updated Standards-Version to 4.5.1
+
+ -- Tino Didriksen <tino@didriksen.cc>  Thu, 10 Dec 2020 14:33:34 +0100
+
+apertium-anaphora (1.0.0-1) unstable; urgency=low
+
+  [ Tino Didriksen ]
+  * New upstream release
+  * debian/control:
+    + Updated Maintainer email address.
+    + Updated Standards-Version to 4.5.0
+    + Switch to debhelper-compat.
+    + Added 'Rules-Requires-Root' field.
+  * Updated debian/copyright.
+  * Updated debian/rules.
+
+ -- Kartik Mistry <kartik@debian.org>  Thu, 02 Jul 2020 10:10:35 +0530
+
+apertium-anaphora (0.0.4-1) unstable; urgency=medium
+
+  [ Tino Didriksen ]
+  * New upstream release
+
+ -- Kartik Mistry <kartik@debian.org>  Wed, 27 Nov 2019 10:42:06 +0100
+
+apertium-anaphora (0.0.3-1) unstable; urgency=medium
+
+  * Minor pkg-config @VERSION@ fix
+
+ -- Kartik Mistry <kartik@debian.org>  Tue, 26 Nov 2019 12:08:43 +0100
+
+apertium-anaphora (0.0.2-1) unstable; urgency=low
+
+  [ Tino Didriksen ]
+  * Initial release (Closes: #941789).
+
+ -- Kartik Mistry <kartik@debian.org>  Sat, 05 Oct 2019 18:24:11 +0530

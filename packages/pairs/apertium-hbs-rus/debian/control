@@ -1,0 +1,32 @@
+Source: apertium-hbs-rus
+Section: science
+Priority: optional
+Maintainer: Debian Science Team <debian-science-maintainers@alioth-lists.debian.net>
+Uploaders: Tino Didriksen <tino@didriksen.cc>,
+           Kartik Mistry <kartik@debian.org>
+Build-Depends: apertium-dev (>= 3.8.0),
+               apertium-hbs,
+               apertium-lex-tools (>= 0.3.0),
+               apertium-rus,
+               cg3-dev (>= 1.3.2),
+               debhelper (>= 12),
+               gawk,
+               pkg-config
+Standards-Version: 4.5.1
+Homepage: https://apertium.org/
+Vcs-Git: https://salsa.debian.org/science-team/apertium-hbs-rus.git
+Vcs-Browser: https://salsa.debian.org/science-team/apertium-hbs-rus
+Rules-Requires-Root: no
+
+Package: apertium-hbs-rus
+Architecture: all
+Depends: apertium (>= 3.8.0),
+         apertium-lex-tools (>= 0.3.0),
+         cg3 (>= 1.3.2),
+         ${misc:Depends},
+         ${shlibs:Depends}
+Provides: apertium-rus-hbs
+Conflicts: apertium-rus-hbs
+Description: Apertium translation data for the Serbo-Croatian-Russian pair
+ Data package providing Apertium language resources for translating
+ between the Serbo-Croatian and Russian languages.

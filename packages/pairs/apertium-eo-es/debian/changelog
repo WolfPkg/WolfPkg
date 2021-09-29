@@ -1,0 +1,33 @@
+apertium-eo-en (0.9.2-1) unstable; urgency=low
+
+  * Fix the build
+
+ -- Tino Didriksen <tino@didriksen.cc>  Mon, 21 Dec 2020 10:01:01 +0100
+
+apertium-eo-es (0.9.1~r60655-1) unstable; urgency=low
+
+  [ Tino Didriksen ]
+  * New upstream release.
+  * Significant changes in svn since tarball, so mixing new build scripts with
+    old data files.
+  * Re-done packaging to take advantage of debhelper 9.
+
+  [ Kartik Mistry ]
+  * Added epoch to version to make sure new version is higher than old.
+  * Fixed debian/copyright.
+
+ -- Kartik Mistry <kartik@debian.org>  Thu, 30 Jul 2015 13:37:16 +0530
+
+apertium-eo-es (0.9.0-1.1) unstable; urgency=low
+
+  * Non-maintainer upload.
+  * Rebuild against apertium 3.1: fix build dependency and configure.ac
+    accordingly; re-run autoconf. (Closes: #527788)
+
+ -- Stefano Zacchiroli <zack@debian.org>  Thu, 10 Sep 2009 13:23:35 +0200
+
+apertium-eo-es (0.9.0-1) unstable; urgency=low
+
+  * Initial release (Closes: #466678)
+
+ -- Francis Tyers <ftyers@prompsit.com>  Wed, 20 Feb 2008 11:34:15 +0100

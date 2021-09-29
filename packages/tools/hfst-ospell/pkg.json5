@@ -1,0 +1,6 @@
+{
+	url: 'hfst/',
+	excludes: [
+		'windows-*',
+		],
+}

@@ -1,0 +1,22 @@
+Source: lttoolbox-java
+Section: science
+Priority: optional
+Maintainer: Debian Science Team <debian-science-maintainers@alioth-lists.debian.net>
+Uploaders: Tino Didriksen <tino@didriksen.cc>,
+           Kartik Mistry <kartik@debian.org>
+Build-Depends: ant, debhelper (>= 9.0), default-jdk-headless
+Standards-Version: 4.5.1
+Homepage: https://apertium.org/
+Vcs-Git: https://salsa.debian.org/science-team/lttoolbox-java.git
+Vcs-Browser: https://salsa.debian.org/science-team/lttoolbox-java
+Rules-Requires-Root: no
+
+Package: lttoolbox-java
+Architecture: all
+Depends: default-jre-headless, ${misc:Depends}
+Description: Apertium lexical processing modules and tools (Java port)
+ The lttoolbox-java contains the augmented letter transducer tools for natural
+ language processing used by Apertium, a platform for building rule-based
+ and hybrid machine translation systems. The software is also useful
+ for making morphological analysers and generators for natural language
+ processing applications.

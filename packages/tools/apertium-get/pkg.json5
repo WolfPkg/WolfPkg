@@ -1,0 +1,6 @@
+{
+	version_in: 'CMakeLists.txt',
+	excludes: [
+		'configure',
+		],
+}

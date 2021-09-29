@@ -1,0 +1,92 @@
+Source: hfst
+Section: science
+Priority: optional
+Maintainer: Debian Science Team <debian-science-maintainers@alioth-lists.debian.net>
+Uploaders: Tino Didriksen <tino@didriksen.cc>,
+           Kartik Mistry <kartik@debian.org>
+Build-Depends: autoconf,
+               automake,
+               bison,
+               debhelper (>= 9.0),
+               dh-autoreconf,
+               dh-python,
+               flex,
+               libfoma-dev,
+               libfst-dev,
+               libicu-dev,
+               libreadline-dev,
+               libtool,
+               pkg-config,
+               python3-dev,
+               python3-setuptools,
+               swig,
+               zlib1g-dev
+Standards-Version: 4.5.1
+Homepage: https://hfst.github.io/
+Vcs-Git: https://salsa.debian.org/science-team/hfst.git
+Vcs-Browser: https://salsa.debian.org/science-team/hfst
+Rules-Requires-Root: no
+
+Package: hfst
+Architecture: any
+Depends: libhfst54 (= ${binary:Version}),
+         ${misc:Depends},
+         ${python3:Depends},
+         ${shlibs:Depends}
+Description: Helsinki Finite-State Transducer Technology
+ The Helsinki Finite-State Transducer software is intended for the
+ implementation of morphological analysers and other tools which are
+ based on weighted and unweighted finite-state transducer technology.
+
+Package: libhfst54
+Section: libs
+Architecture: any
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Provides: libhfst
+Conflicts: libhfst, libhfst3
+Replaces: libhfst, libhfst3
+Description: Helsinki Finite-State Transducer Technology Libraries
+ The Helsinki Finite-State Transducer software is intended for the
+ implementation of morphological analysers and other tools which are
+ based on weighted and unweighted finite-state transducer technology.
+ .
+ This package provides runtime libraries for HFST.
+
+Package: libhfst-dev
+Architecture: any
+Section: libdevel
+Depends: hfst (= ${binary:Version}),
+         libhfst54 (= ${binary:Version}),
+         ${misc:Depends},
+         ${shlibs:Depends}
+Conflicts: libhfst3-dev
+Replaces: libhfst3-dev
+Description: Helsinki Finite-State Transducer Technology Development files
+ The Helsinki Finite-State Transducer software is intended for the
+ implementation of morphological analysers and other tools which are
+ based on weighted and unweighted finite-state transducer technology.
+ .
+ This package provides development headers and libraries for HFST
+
+Package: python3-hfst
+Architecture: any
+Section: python
+Depends: libhfst54 (= ${binary:Version}),
+         ${misc:Depends},
+         ${python3:Depends},
+         ${shlibs:Depends}
+Provides: ${python3:Provides}
+XB-Python-Version: ${python3:Versions}
+Description: Helsinki Finite-State Transducer Technology (Python3 module)
+ The Helsinki Finite-State Transducer software is intended for the
+ implementation of morphological analysers and other tools which are
+ based on weighted and unweighted finite-state transducer technology.
+ .
+ This package provides Python3 module for libhfst.
+
+Package: python3-libhfst
+Architecture: all
+Section: oldlibs
+Depends: python3-hfst (>= ${binary:Version}), ${misc:Depends}
+Description: Transitional dummy package for python3-hfst
+ This is a transitional dummy package. It can safely be removed.

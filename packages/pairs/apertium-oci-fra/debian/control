@@ -1,0 +1,32 @@
+Source: apertium-oci-fra
+Section: science
+Priority: optional
+Maintainer: Debian Science Team <debian-science-maintainers@alioth-lists.debian.net>
+Uploaders: Tino Didriksen <tino@didriksen.cc>,
+           Kartik Mistry <kartik@debian.org>
+Build-Depends: apertium-dev (>= 3.8.0),
+               apertium-fra (>= 1.7.0),
+               apertium-lex-tools (>= 0.3.0),
+               apertium-oci (>= 0.2.0),
+               cg3-dev (>= 1.3.2),
+               debhelper (>= 12),
+               gawk,
+               pkg-config
+Standards-Version: 4.5.1
+Homepage: https://apertium.org/
+Vcs-Git: https://salsa.debian.org/science-team/apertium-oci-fra.git
+Vcs-Browser: https://salsa.debian.org/science-team/apertium-oci-fra
+Rules-Requires-Root: no
+
+Package: apertium-oci-fra
+Architecture: all
+Depends: apertium (>= 3.8.0),
+         apertium-lex-tools (>= 0.3.0),
+         cg3 (>= 1.3.2),
+         ${misc:Depends},
+         ${shlibs:Depends}
+Provides: apertium-fra-oci
+Conflicts: apertium-fra-oci
+Description: Apertium translation data for the Occitan-French pair
+ Data package providing Apertium language resources for translating
+ between the Occitan and French languages.

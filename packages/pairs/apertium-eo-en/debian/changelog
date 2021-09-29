@@ -1,0 +1,19 @@
+apertium-eo-en (1.0.1-1) unstable; urgency=low
+
+  * Fix the build
+
+ -- Tino Didriksen <tino@didriksen.cc>  Mon, 21 Dec 2020 10:01:01 +0100
+
+apertium-eo-en (1.0.0~r63833-1) unstable; urgency=low
+
+  * Update to latest from svn, to get compatible build files
+
+ -- Tino Didriksen <tino@didriksen.cc>  Mon, 04 Jan 2016 17:12:39 +0200
+
+apertium-eo-en (1.0.0~r19299-1) unstable; urgency=low
+
+  * Initial release
+  * Significant changes in svn since tarball, so mixing new build scripts with
+    old data files
+
+ -- Tino Didriksen <mail@tinodidriksen.com>  Mon, 13 Oct 2014 07:17:28 +0000

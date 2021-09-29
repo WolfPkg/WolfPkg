@@ -1,0 +1,12 @@
+apertium-mlt-ara (0.2.1-1) unstable; urgency=low
+
+  * Fix the build
+
+ -- Tino Didriksen <tino@didriksen.cc>  Thu, 31 Dec 2020 14:03:02 +0100
+
+apertium-mlt-ara (0.2.0~r62623-1) experimental; urgency=low
+
+  * Initial release
+  * No significant changes in svn since tarball, so taking directly from svn
+
+ -- Tino Didriksen <tino@didriksen.cc>  Wed, 15 Jun 2016 13:35:39 +0200

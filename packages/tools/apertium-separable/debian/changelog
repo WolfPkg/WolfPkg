@@ -1,0 +1,50 @@
+apertium-separable (0.3.6-1) unstable; urgency=low
+
+  * Update to latest upstream
+  * debian/control:
+    + Updated Standards-Version to 4.5.1
+
+ -- Tino Didriksen <tino@didriksen.cc>  Thu, 10 Dec 2020 14:33:34 +0100
+
+apertium-separable (0.3.3-1) unstable; urgency=low
+
+  [ Tino Didriksen ]
+  * Update to latest upstream
+  * Updated dh to 12
+  * debian/control:
+    + Updated Standards-Version to 4.4.1
+
+  [ Kartik Mistry ]
+  * Added debian/gitlab-ci.yml
+
+ -- Kartik Mistry <kartik@debian.org>  Tue, 29 Oct 2019 18:23:29 +0530
+
+apertium-separable (0.3.2-1) unstable; urgency=low
+
+  [ Tino Didriksen ]
+  * Update to latest upstream.
+  * Updated dh to 11.
+  * Updated Standards-Version to 4.2.1
+
+ -- Kartik Mistry <kartik@debian.org>  Sun, 14 Oct 2018 18:59:54 +0530
+
+apertium-separable (0.3.1-1) unstable; urgency=low
+
+  [ Tino Didriksen ]
+  * Update to latest upstream release.
+
+  [ Kartik Mistry ]
+  * debian/control:
+    + Updated Build-Depends.
+    + Updated Standards-Version to 4.1.4
+  * Updated debian/watch file.
+  * Install examples in the package.
+
+ -- Kartik Mistry <kartik@debian.org>  Mon, 18 Jun 2018 17:47:56 +0530
+
+apertium-separable (0.2.0~r84328-1) unstable; urgency=low
+
+  [ Tino Didriksen ]
+  * Initial release. (Closes: #893772)
+
+ -- Kartik Mistry <kartik@debian.org>  Fri, 23 Mar 2018 18:16:34 +0530

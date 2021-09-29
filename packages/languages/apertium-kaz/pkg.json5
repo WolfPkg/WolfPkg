@@ -1,0 +1,7 @@
+{
+	excludes: [
+		'*/',
+		'+ dev/editdist.py',
+		'+ speller/.*',
+		],
+}

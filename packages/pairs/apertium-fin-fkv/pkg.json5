@@ -1,0 +1,7 @@
+{
+	excludes: [
+		'*/',
+		'+ dev/punctuation.lexc',
+		'+ docs/.*',
+		],
+}

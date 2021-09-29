@@ -1,0 +1,25 @@
+giella-sme (0.1.0+s186483-1) unstable; urgency=low
+
+  * New upstream release
+  * Remove sub-package giella-sme-dev
+
+ -- Tino Didriksen <tino@didriksen.cc>  Sat, 28 Dec 2019 12:20:07 +0100
+
+giella-sme (0.1.0~r163313-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Tino Didriksen <tino@didriksen.cc>  Wed, 07 Feb 2018 16:10:05 +0000
+
+giella-sme (0.0.20150917~r145302-1) unstable; urgency=low
+
+  * Latest upstream release
+
+ -- Tino Didriksen <tino@didriksen.cc>  Mon, 19 Dec 2016 11:37:01 +0100
+
+giella-sme (0.0.20150917~r121176-1) unstable; urgency=low
+
+  [ Tino Didriksen ]
+  * Initial release (Closes: #814400)
+
+ -- Kartik Mistry <kartik@debian.org>  Thu, 03 Mar 2016 08:45:22 +0000

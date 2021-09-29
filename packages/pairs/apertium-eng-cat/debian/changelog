@@ -1,0 +1,67 @@
+apertium-eng-cat (1.0.1-1) unstable; urgency=low
+
+  [ Tino Didriksen ]
+  * New upstream release:
+    + Renamed apertium-en-ca to apertium-eng-cat.
+  * Bundles apertium-eng 0.1.0 and apertium-cat 2.8.0 in package.
+
+ -- Kartik Mistry <kartik@debian.org>  Tue, 26 Nov 2019 16:40:40 +0100
+
+apertium-en-ca (0.9.3~r61328-2) unstable; urgency=low
+
+  * debian/control:
+    + Updated Standards-Version to 4.1.4
+    + Updated Vcs-* URLs.
+    + Updated Homepage.
+    + Updated Depends.
+  * Updated debian/copyright.
+  * Updated debian/watch.
+
+ -- Kartik Mistry <kartik@debian.org>  Wed, 27 Jun 2018 11:33:34 +0530
+
+apertium-en-ca (0.9.3~r61328-1) unstable; urgency=low
+
+  * New upstream svn snapshot.
+  * debian/control:
+    + Do not depends on locales
+    + Updated Standards-Version to 3.9.8
+    + Fixed Vcs-Git URL
+  * debian/rules:
+    + Simplified rules file after removing locales dependency.
+
+ -- Kartik Mistry <kartik@debian.org>  Tue, 14 Jun 2016 20:54:38 +0530
+
+apertium-en-ca (0.9.3~r61232-1) unstable; urgency=low
+
+  [ Tino Didriksen ]
+  * New upstream release
+  * Significant changes in svn since tarball, so mixing new build scripts with
+    old data files
+  * Re-done packaging to take advantage of debhelper 9
+
+ -- Kartik Mistry <kartik@debian.org>  Thu, 09 Jul 2015 19:31:49 +0530
+
+apertium-en-ca (0.8.9-1) unstable; urgency=low
+
+  * New upstream release
+  * Added dependency on apertium-pcre2
+
+ -- Francis Tyers <ftyers@prompsit.com>  Fri, 27 Mar 2009 11:27:13 +0000
+
+apertium-en-ca (0.8.4-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Francis Tyers <ftyers@prompsit.com>  Wed, 19 Mar 2008 13:50:02 +0000
+
+apertium-en-ca (0.8.3-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Francis Tyers <ftyers@prompsit.com>  Fri, 07 Dec 2007 14:25:08 +0000
+
+apertium-en-ca (0.8.2-1) unstable; urgency=low
+
+  * Initial release (Closes: #418544)
+
+ -- Francis Tyers <ftyers@prompsit.com>  Thu, 04 Oct 2007 14:24:41 +0100

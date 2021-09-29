@@ -1,0 +1,27 @@
+Source: transfuse
+Section: science
+Priority: optional
+Maintainer: Debian Science Team <debian-science-maintainers@alioth-lists.debian.net>
+Uploaders: Tino Didriksen <tino@didriksen.cc>,
+           Kartik Mistry <kartik@debian.org>
+Build-Depends: cmake,
+               debhelper (>= 9.0),
+               libicu-dev,
+               libsqlite3-dev,
+               libxml2-dev,
+               libzip-dev,
+               pkg-config
+Standards-Version: 4.5.1
+Homepage: https://github.com/TinoDidriksen/transfuse
+Vcs-Git: https://salsa.debian.org/science-team/transfuse.git
+Vcs-Browser: https://salsa.debian.org/science-team/transfuse
+Rules-Requires-Root: no
+
+Package: transfuse
+Architecture: any
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Description: Runs formatted documents through transformations/translation
+ Tool to take a document with nested inline complex formatting and extracts
+ formatting into manageable spans, optionally send the resulting stream
+ to a handler for transformation, inject the transformed stream back into
+ the original document and turn the spans back into formatting.

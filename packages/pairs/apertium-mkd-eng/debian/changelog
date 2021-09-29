@@ -1,0 +1,15 @@
+apertium-mkd-eng (0.1.2-1) unstable; urgency=low
+
+  * Fix the build
+  * Renamed to apertium-mkd-eng
+
+ -- Tino Didriksen <tino@didriksen.cc>  Thu, 31 Dec 2020 14:03:02 +0100
+
+apertium-mk-en (0.1.1~r57554-1) unstable; urgency=low
+
+  [ Tino Didriksen ]
+  * Initial release. (Closes: #597412)
+  * Significant changes in svn since tarball, so mixing new build scripts with
+    old data files.
+
+ -- Kartik Mistry <kartik@debian.org>  Thu, 07 Jul 2016 12:22:14 +0530

@@ -1,0 +1,6 @@
+{
+	excludes: [
+		'*/',
+		'+ lexd_components/.*',
+		],
+}

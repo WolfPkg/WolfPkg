@@ -1,0 +1,11 @@
+{
+	url: 'TinoDidriksen/spellers',
+	version_in: 'include/shared.hpp',
+	excludes: [
+		'*/',
+		'+ include/.*',
+		'+ msoffice/.*',
+		'+ mozilla/native/.*',
+		'+ windows/.*',
+		],
+}

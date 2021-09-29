@@ -1,0 +1,26 @@
+apertium-pt-gl (0.9.3-1) unstable; urgency=low
+
+  * Fix the build
+
+ -- Tino Didriksen <tino@didriksen.cc>  Sun, 03 Jan 2021 13:06:03 +0100
+
+apertium-pt-gl (0.9.2~r57551-1) unstable; urgency=low
+
+  * New upstream release
+  * No significant changes in svn since tarball, so taking directly from svn
+  * Re-done packaging to take advantage of debhelper 9
+
+ -- Tino Didriksen <mail@tinodidriksen.com>  Mon, 13 Oct 2014 07:17:28 +0000
+
+apertium-pt-gl (0.9.1-1) unstable; urgency=low
+
+  * New upstream release
+  * Added dependency on apertium-pcre2
+
+ -- Francis Tyers <ftyers@prompsit.com>  Tue, 03 Mar 2009 19:38:26 +0000
+
+apertium-pt-gl (0.9.0-1) unstable; urgency=low
+
+  * Initial release (Closes: #485589)
+
+ -- Francis Tyers <ftyers@prompsit.com>  Tue, 10 Jun 2008 10:24:41 +0100

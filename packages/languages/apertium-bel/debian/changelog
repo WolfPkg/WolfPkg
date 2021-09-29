@@ -1,0 +1,11 @@
+apertium-bel (0.1.1-1) unstable; urgency=low
+
+  * Minor fix
+
+ -- Tino Didriksen <tino@didriksen.cc>  Fri, 27 Mar 2020 18:16:36 +0100
+
+apertium-bel (0.1.0~r81357-1) experimental; urgency=low
+
+  * Initial release
+
+ -- Tino Didriksen <tino@didriksen.cc>  Thu, 03 Aug 2017 12:49:39 +0200

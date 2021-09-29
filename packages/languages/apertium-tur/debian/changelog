@@ -1,0 +1,18 @@
+apertium-tur (0.2.0-2) unstable; urgency=low
+
+  * The same as 0.2.0, but as a git tag.
+
+ -- Tino Didriksen <tino@didriksen.cc>  Sun, 03 Jan 2021 13:06:03 +0100
+
+apertium-tur (0.2.0~r83161-1) unstable; urgency=low
+
+  * Update to latest upstream release
+
+ -- Tino Didriksen <tino@didriksen.cc>  Wed, 22 Nov 2017 13:51:21 +0100
+
+apertium-tur (0.1.0~r81882-1) unstable; urgency=low
+
+  [ Tino Didriksen ]
+  * Initial release (Closes: #875431)
+
+ -- Kartik Mistry <kartik@debian.org>  Mon, 11 Sep 2017 17:11:08 +0530

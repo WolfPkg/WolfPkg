@@ -1,0 +1,11 @@
+apertium-isl-eng (0.1.1-1) unstable; urgency=low
+
+  * Fix the build
+
+ -- Tino Didriksen <tino@didriksen.cc>  Thu, 31 Dec 2020 14:03:02 +0100
+
+apertium-isl-eng (0.1.0~r66083-1) experimental; urgency=low
+
+  * Initial release
+
+ -- Tino Didriksen <tino@didriksen.cc>  Mon, 13 Oct 2014 07:17:28 +0000

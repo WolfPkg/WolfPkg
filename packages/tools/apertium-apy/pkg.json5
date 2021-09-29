@@ -1,0 +1,6 @@
+{
+	version_in: 'apertium_apy/apy.py',
+	non_targets: [
+		'stretch',
+		],
+}
