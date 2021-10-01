@@ -1,7 +1,8 @@
 <?php
+declare(strict_types=1);
 namespace Pkg;
 
-function enum_packages() {
+function enum_packages(): array {
 	$pkgs = [];
 	$fs = glob('packages/[a-z]*/*/pkg.json5');
 	foreach ($fs as $f) {
@@ -13,7 +14,7 @@ function enum_packages() {
 	return $pkgs;
 }
 
-function parse_conf($j5, $pkname, $raw = false) {
+function parse_conf(string $j5, string $pkname, bool $raw = false): array {
 	$conf = json5_decode($j5, true);
 	if (!$raw) {
 		if (empty($conf['url'])) {
@@ -52,17 +53,17 @@ function parse_conf($j5, $pkname, $raw = false) {
 	return $conf;
 }
 
-function load_conf($path, $pkname, $raw = false) {
-	return parse_conf(file_get_contents($path), $pkname, $raw);
+function load_conf(string $path, string $pkname, bool $raw = false): array {
+	return parse_conf(\E\file_get_contents($path), $pkname, $raw);
 }
 
-function read_control($path) {
-	$c = file_get_contents("{$path}/debian/control");
+function read_control(string $path): string {
+	$c = \E\file_get_contents("{$path}/debian/control");
 	$c = preg_replace('~,[\s\n]+~', ', ', $c);
 	return $c;
 }
 
-function get_kinds() {
+function get_kinds(): array {
 	$db = \Db\get_rw();
 	$ks = [];
 	$stm = $db->prepexec("SELECT k_id, k_name FROM kinds");
@@ -72,15 +73,15 @@ function get_kinds() {
 	return $ks;
 }
 
-function mirror_repo($conf) {
+function mirror_repo(array $conf) {
 	$rev = false;
 	$pwd = getcwd();
 	$fl = substr($conf['name'], 0, 1).substr($conf['name'], -1);
 	@mkdir($_ENV['WOLFPKG_WORKDIR']."/packages/{$fl}/{$conf['name']}/logs/repo", 0711, true);
-	chdir($_ENV['WOLFPKG_WORKDIR']."/packages/{$fl}/{$conf['name']}");
+	\E\chdir($_ENV['WOLFPKG_WORKDIR']."/packages/{$fl}/{$conf['name']}");
 
 	$stamp = date('Ymd-His');
-	$log = fopen($_ENV['WOLFPKG_WORKDIR']."/packages/{$fl}/{$conf['name']}/logs/repo/{$stamp}.log", 'wb');
+	$log = \E\fopen($_ENV['WOLFPKG_WORKDIR']."/packages/{$fl}/{$conf['name']}/logs/repo/{$stamp}.log", 'wb');
 	\Utils\log_nl($log, "URL: {$conf['url']}");
 	\Utils\log_nl($log, 'VCS: '.$conf['vcs']);
 
@@ -88,14 +89,14 @@ function mirror_repo($conf) {
 		if (!is_dir('repo.git')) {
 			\Utils\log_exec($log, "git clone --mirror '{$conf['url']}' repo.git");
 		}
-		chdir('repo.git');
+		\E\chdir('repo.git');
 		\Utils\log_exec($log, 'git fetch --all -f');
 		\Utils\log_exec($log, 'git remote update -p');
 
 		if (intval(\Utils\log_exec($log, 'git branch | grep [*] | wc -l')) == 0) {
 			\Utils\log_nl($log, 'No default branch - trying to determine new default');
-			$head = \Utils\log_exec($log, "git remote show origin | grep 'HEAD branch' | egrep -o '([^ ]+)\$'");
-			\Utils\log_exec($log, "git symbolic-ref HEAD 'refs/heads/$head'");
+			$default = \Utils\log_exec($log, "git remote show origin | grep 'HEAD branch' | egrep -o '([^ ]+)\$'");
+			\Utils\log_exec($log, "git symbolic-ref HEAD 'refs/heads/{$default}'");
 			\Utils\log_exec($log, "git fetch --all -f");
 			\Utils\log_exec($log, "git remote update -p");
 			if (intval(\Utils\log_exec($log, 'git branch | grep [*] | wc -l')) == 0) {
@@ -126,7 +127,7 @@ function mirror_repo($conf) {
 			if (!is_dir('repo.svn')) {
 				\Utils\log_exec($log, "svn co '{$conf['url']}' repo.svn/");
 			}
-			chdir('repo.svn');
+			\E\chdir('repo.svn');
 			\Utils\log_exec($log, "svn switch --ignore-ancestry --force --accept tf '{$conf['url']}/'");
 			\Utils\log_exec($log, 'svn cleanup');
 			\Utils\log_exec($log, 'svn cleanup --remove-unversioned --remove-ignored');
@@ -136,7 +137,7 @@ function mirror_repo($conf) {
 		catch (Exception $e) {
 			if (!$retried) {
 				\Utils\log_nl($log, "Subversion repo failed: {$e}");
-				chdir('..');
+				\E\chdir('..');
 				\Utils\log_exec($log, 'rm -rf repo.svn');
 				$retried = true;
 				goto RETRY_SVN;
@@ -157,7 +158,49 @@ function mirror_repo($conf) {
 	}
 
 	fclose($log);
-	chdir($pwd);
+	\E\chdir($pwd);
+
+	if (empty($rev)) {
+		return $rev;
+	}
+
+	$rev['thash'] = \Utils\sha256_b64x($conf['chash'].var_export($rev, true));
+	$rev['changed'] = false;
+
+	$db = \Db\get_rw();
+	$db->beginTransaction();
+	$orev = $db->prepexec("SELECT p_id, r_rev, r_stamp, r_count, r_thash FROM package_repo WHERE p_id = ?", [$conf['id']])->fetchAll();
+	if (!empty($orev)) {
+		$orev = $orev[0];
+		if ($orev['r_thash'] !== $rev['thash']) {
+			$db->prepexec("UPDATE package_repo SET r_rev = ?, r_stamp = ?, r_count = ?, r_thash WHERE p_id = ?", [$rev['rev'], $rev['stamp'], $rev['count'], $rev['thash'], $conf['id']]);
+			$rev['changed'] = true;
+		}
+	}
+	else {
+		$db->prepexec("INSERT INTO package_repo (p_id, r_rev, r_stamp, r_count, r_thash) VALUES (?, ?, ?, ?, ?)", [$conf['id'], $rev['rev'], $rev['stamp'], $rev['count'], $rev['thash']]);
+		$rev['changed'] = true;
+	}
+	$db->commit();
 
 	return $rev;
+}
+
+function make_tarball(array $conf, array $rev) {
+	$pwd = getcwd();
+	$fl = substr($conf['name'], 0, 1).substr($conf['name'], -1);
+	@mkdir($_ENV['WOLFPKG_WORKDIR']."/packages/{$fl}/{$conf['name']}/logs/tars", 0711, true);
+	@mkdir($_ENV['WOLFPKG_WORKDIR']."/packages/{$fl}/{$conf['name']}/tars", 0711, true);
+	\E\chdir($_ENV['WOLFPKG_WORKDIR']."/packages/{$fl}/{$conf['name']}/tars");
+
+	if (file_exists('.tar.zst') && filesize()) {
+	}
+	$tar = [];
+
+	$stamp = date('Ymd-His');
+	$log = \E\fopen($_ENV['WOLFPKG_WORKDIR']."/packages/{$fl}/{$conf['name']}/logs/tars/{$stamp}.log", 'wb');
+	\Utils\log_nl($log, 'VCS: '.$conf['vcs']);
+
+	fclose($log);
+	\E\chdir($pwd);
 }

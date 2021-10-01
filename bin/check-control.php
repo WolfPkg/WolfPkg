@@ -1,9 +1,10 @@
 #!/usr/bin/env php
 <?php
+declare(strict_types=1);
 
 require_once __DIR__.'/../lib/autoconf.php';
 
-chdir($_ENV['WOLFPKG_ROOT']);
+\E\chdir($_ENV['WOLFPKG_ROOT']);
 
 $db = \Db\get_rw();
 $kinds = \Pkg\get_kinds();
@@ -158,7 +159,13 @@ foreach ($pkgs as $path => $pkname) {
 }
 
 foreach ($todo as $pkname => $ks) {
-	\Pkg\mirror_repo($confs[$pkname]);
+	$confs[$pkname]['id'] = $exps[$pkname]['p_id'];
+	$confs[$pkname]['chash'] = $exps[$pkname]['p_chash'];
+
+	$rev = \Pkg\mirror_repo($confs[$pkname]);
+	if ($rev['changed']) {
+		$tar = \Pkg\make_tarball($conf, $rev);
+	}
 	break;
 	foreach ($ks as $kind) {
 	}

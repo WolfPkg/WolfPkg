@@ -1,7 +1,8 @@
 <?php
+declare(strict_types=1);
 namespace Db;
 
-function get($read_only = false) {
+function get(bool $read_only = false): object {
 	$which = "-wolfpkg-db-handle-{$read_only}";
 	if (!empty($GLOBALS[$which])) {
 		return $GLOBALS[$which];
@@ -12,7 +13,7 @@ function get($read_only = false) {
 
 	$opts = [];
 	if ($read_only) {
-		$opts = [PDO::SQLITE_ATTR_OPEN_FLAGS => PDO::SQLITE_OPEN_READONLY];
+		$opts = [\PDO::SQLITE_ATTR_OPEN_FLAGS => \PDO::SQLITE_OPEN_READONLY];
 	}
 	$db = new \TDC\PDO\SQLite($db_file, $opts);
 
@@ -29,7 +30,7 @@ function get($read_only = false) {
 
 	if (!$existed) {
 		printf("Creating SQLite database %s\n", $db_file);
-		$db->exec(file_get_contents($_ENV['WOLFPKG_ROOT'].'/lib/schema.sql'));
+		$db->exec(\E\file_get_contents($_ENV['WOLFPKG_ROOT'].'/lib/schema.sql'));
 		/*
 		$db->exec("CREATE TABLE sources (
 			p_id INTEGER NOT NULL,
@@ -68,10 +69,10 @@ function get($read_only = false) {
 	return $db;
 }
 
-function get_rw() {
+function get_rw(): object {
 	return get(false);
 }
 
-function get_ro() {
+function get_ro(): object {
 	return get(true);
 }
