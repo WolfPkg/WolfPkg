@@ -169,11 +169,11 @@ function mirror_repo(array $conf) {
 
 	$db = \Db\get_rw();
 	$db->beginTransaction();
-	$orev = $db->prepexec("SELECT p_id, r_rev, r_stamp, r_count, r_thash FROM package_repo WHERE p_id = ?", [$conf['id']])->fetchAll();
+	$orev = $db->prepexec("SELECT p_id, r_rev, r_stamp, r_count, r_thash FROM package_repo WHERE p_id = ? AND r_rev = ?", [$conf['id'], $rev['rev']])->fetchAll();
 	if (!empty($orev)) {
 		$orev = $orev[0];
 		if ($orev['r_thash'] !== $rev['thash']) {
-			$db->prepexec("UPDATE package_repo SET r_rev = ?, r_stamp = ?, r_count = ?, r_thash WHERE p_id = ?", [$rev['rev'], $rev['stamp'], $rev['count'], $rev['thash'], $conf['id']]);
+			$db->prepexec("UPDATE package_repo SET r_rev = ?, r_stamp = ?, r_count = ?, r_thash = ?, r_version = '' WHERE p_id = ? AND r_rev = ?", [$rev['rev'], $rev['stamp'], $rev['count'], $rev['thash'], $conf['id'], $rev['rev']]);
 			$rev['changed'] = true;
 		}
 	}
@@ -181,6 +181,7 @@ function mirror_repo(array $conf) {
 		$db->prepexec("INSERT INTO package_repo (p_id, r_rev, r_stamp, r_count, r_thash) VALUES (?, ?, ?, ?, ?)", [$conf['id'], $rev['rev'], $rev['stamp'], $rev['count'], $rev['thash']]);
 		$rev['changed'] = true;
 	}
+	$db->prepexec("DELETE FROM package_repo WHERE p_id = ? AND r_count > ?", [$conf['id'], $rev['count']]);
 	$db->commit();
 
 	return $rev;

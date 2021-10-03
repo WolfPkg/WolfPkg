@@ -10,7 +10,7 @@ function putenv(string $k, string $v): void {
 function b64x(string $str): string {
 	$str = \base64_encode($str);
 	$str = trim($str, '=');
-	$str = strtr($str, '/+', '-_');
+	$str = strtr($str, '/+', '_-');
 	return $str;
 }
 
