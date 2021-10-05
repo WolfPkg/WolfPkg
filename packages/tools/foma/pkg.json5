@@ -1,5 +1,6 @@
 {
-	url: 'https://github.com/mhulden/foma/trunk/foma',
+	url: 'https://github.com/mhulden/foma',
+	root: 'foma',
 	version_in: 'Makefile',
 	excludes: [
 		'*/',

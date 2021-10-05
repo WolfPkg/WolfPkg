@@ -159,6 +159,7 @@ foreach ($pkgs as $path => $pkname) {
 }
 
 foreach ($todo as $pkname => $ks) {
+	break;
 	$confs[$pkname]['id'] = $exps[$pkname]['p_id'];
 	$confs[$pkname]['chash'] = $exps[$pkname]['p_chash'];
 
@@ -166,7 +167,6 @@ foreach ($todo as $pkname => $ks) {
 	if ($rev['changed']) {
 		$tar = \Pkg\make_tarball($conf, $rev);
 	}
-	break;
 	foreach ($ks as $kind) {
 	}
 }

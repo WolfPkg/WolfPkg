@@ -1,5 +1,6 @@
 <?php
 declare(strict_types=1);
+setlocale(LC_ALL, 'C.UTF-8');
 
 $env = [];
 $env['WOLFPKG_ROOT'] = dirname(__DIR__);
@@ -15,6 +16,7 @@ require_once __DIR__.'/Db.php';
 clearstatcache();
 $_ENV = \getenv();
 \Utils\putenv('TZ', 'UTC');
+\Utils\putenv('LC_ALL', 'C.UTF-8');
 
 foreach ($env as $k => $v) {
 	if (!\array_key_exists($k, $_ENV)) {

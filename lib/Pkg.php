@@ -32,6 +32,7 @@ function parse_conf(string $j5, string $pkname, bool $raw = false): array {
 		$def = [
 			'name' => $pkname,
 			'url' => $conf['url'],
+			'root' => '',
 			'vcs' => 'git',
 			'version_in' => 'configure.ac',
 			'excludes' => [],
@@ -111,7 +112,7 @@ function mirror_repo(array $conf) {
 
 		$default = \Utils\log_exec($log, "git remote show origin | grep 'HEAD branch' | egrep -o '([^ ]+)\$'");
 		$rev = \Utils\log_exec($log, "git log '--date=format-local:%Y-%m-%d %H:%M:%S' --first-parent '--format=format:%H%x09%ad' -n1 '{$default}'");
-		$cnt = intval(\Utils\log_exec($log, "git log '--format=format:\%H' '{$default}' | sort | uniq | wc -l"));
+		$cnt = intval(\Utils\log_exec($log, "git log '--format=format:%H' '{$default}' | sort | uniq | wc -l"));
 		$rev = explode("\t", $rev);
 		$rev = [
 			'rev' => $rev[0],
@@ -160,7 +161,7 @@ function mirror_repo(array $conf) {
 	fclose($log);
 	\E\chdir($pwd);
 
-	if (empty($rev)) {
+	if ($rev === false) {
 		return $rev;
 	}
 
@@ -192,15 +193,48 @@ function make_tarball(array $conf, array $rev) {
 	$fl = substr($conf['name'], 0, 1).substr($conf['name'], -1);
 	@mkdir($_ENV['WOLFPKG_WORKDIR']."/packages/{$fl}/{$conf['name']}/logs/tars", 0711, true);
 	@mkdir($_ENV['WOLFPKG_WORKDIR']."/packages/{$fl}/{$conf['name']}/tars", 0711, true);
-	\E\chdir($_ENV['WOLFPKG_WORKDIR']."/packages/{$fl}/{$conf['name']}/tars");
 
-	if (file_exists('.tar.zst') && filesize()) {
-	}
-	$tar = [];
+	@mkdir($_ENV['WOLFPKG_WORKDIR']."/tmp/{$fl}/{$conf['name']}", 0711, true);
+	\E\chdir($_ENV['WOLFPKG_WORKDIR']."/tmp/{$fl}/{$conf['name']}");
 
 	$stamp = date('Ymd-His');
 	$log = \E\fopen($_ENV['WOLFPKG_WORKDIR']."/packages/{$fl}/{$conf['name']}/logs/tars/{$stamp}.log", 'wb');
 	\Utils\log_nl($log, 'VCS: '.$conf['vcs']);
+	\Utils\log_nl($log, 'Rev: '.$rev['rev']);
+
+	$tar = [];
+
+	if ($conf['vcs'] === 'git') {
+		\Utils\log_exec($log, "git clone --shallow-submodules '{$_ENV['WOLFPKG_WORKDIR']}/packages/{$fl}/{$conf['name']}/repo.git' '{$rev['rev']}'");
+		\E\chdir($rev['rev']);
+		\Utils\log_exec($log, "git reset --hard '{$rev['rev']}'");
+		\Utils\log_exec($log, 'git submodule update --init --depth 1 --recursive || git submodule update --init --depth 100 --recursive');
+
+		$root = '';
+		if (strlen($conf['root'])) {
+			$root = escapeshellarg($conf['root']);
+		}
+
+		$trev = \Utils\log_exec($log, "git log '--date=format-local:%Y-%m-%d %H:%M:%S' --first-parent '--format=format:%H%x09%ad' -n1 {$root}");
+		$tcnt = intval(\Utils\log_exec($log, "git log '--format=format:%H' {$root} | sort | uniq | wc -l"));
+		$trev = explode("\t", $trev);
+		$tar = [
+			'rev' => $trev[0],
+			'stamp' => strtotime($trev[1]),
+			'count' => $tcnt,
+			];
+
+		if ($root) {
+			$rnd = bin2hex(random_bytes(8));
+			\Utils\log_exec($log, "mv -v {$root} '../{$rnd}'");
+			\E\chdir('..');
+			\Utils\log_exec($log, "rm -rf '{$rev['rev']}'");
+			\Utils\log_exec($log, "mv -v '{$rnd}' '{$rev['rev']}'");
+			\E\chdir($rev['rev']);
+		}
+	}
+	else {
+	}
 
 	fclose($log);
 	\E\chdir($pwd);
