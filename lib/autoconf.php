@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 setlocale(LC_ALL, 'C.UTF-8');
+date_default_timezone_set('UTC');
 
 $env = [];
 $env['WOLFPKG_ROOT'] = dirname(__DIR__);

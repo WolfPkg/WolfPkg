@@ -1,5 +1,5 @@
 {
-	url: 'https://gtsvn.uit.no/langtech/trunk/tools/CorpusTools',
+	url: 'https://github.com/giellalt/CorpusTools',
 	version_in: 'corpustools/_version.py',
 	non_targets: [
 		'stretch',
