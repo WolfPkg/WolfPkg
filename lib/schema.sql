@@ -34,8 +34,8 @@ CREATE TABLE package_tar (
 	t_rev TEXT NOT NULL, -- local commit hash or revision number
 	t_stamp INTEGER NOT NULL,
 	t_count INTEGER NOT NULL, -- local monotonically increasing revision number
-	t_thash TEXT NOT NULL, -- combined hash of r_thash and other t_* fields
-	t_version TEXT NOT NULL DEFAULT '',
+	t_version TEXT NOT NULL,
+	t_thash TEXT NOT NULL, -- sha256 hash of the sorted tarball
 	PRIMARY KEY(p_id, r_rev),
 	FOREIGN KEY(p_id, r_rev) REFERENCES package_repo(p_id, r_rev) ON UPDATE CASCADE ON DELETE CASCADE
 	) WITHOUT ROWID;

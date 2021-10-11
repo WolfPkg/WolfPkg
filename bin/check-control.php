@@ -165,7 +165,7 @@ foreach ($todo as $pkname => $ks) {
 
 	$rev = \Pkg\mirror_repo($confs[$pkname]);
 	if ($rev['changed']) {
-		$tar = \Pkg\make_tarball($conf, $rev);
+		$tar = \Pkg\make_tarball($conf, $rev['rev']);
 	}
 	foreach ($ks as $kind) {
 	}

@@ -1,5 +1,5 @@
 {
-	url: 'https://github.com/giellalt/CorpusTools',
+	url: 'giellalt/CorpusTools',
 	version_in: 'corpustools/_version.py',
 	non_targets: [
 		'stretch',

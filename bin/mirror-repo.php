@@ -1,9 +1,15 @@
 #!/usr/bin/env php
 <?php
+declare(strict_types=1);
 
 require_once __DIR__.'/../lib/autoconf.php';
 
 \E\chdir($_ENV['WOLFPKG_ROOT']);
+
+if (empty($argv[1])) {
+	echo "Must provide at least package pattern!\n";
+	exit(-1);
+}
 
 $db = \Db\get_rw();
 
@@ -18,7 +24,7 @@ foreach ($pkgs as $path => $pkname) {
 	if (empty($exps[$pkname])) {
 		continue;
 	}
-	if (!preg_match('~'.$argv[1].'~', $pkname)) {
+	if (!preg_match('~'.$argv[1].'~u', $pkname)) {
 		continue;
 	}
 
@@ -29,8 +35,6 @@ foreach ($pkgs as $path => $pkname) {
 
 	if (!$conf['enabled']) {
 		printf("Skipped (disabled): %s\n", $pkname);
-		unset($exps[$pkname]);
-		unset($pkgs[$path]);
 		continue;
 	}
 

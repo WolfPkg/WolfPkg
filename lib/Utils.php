@@ -41,22 +41,47 @@ function int(&$v): void {
 	$v = intval($v);
 }
 
-function log_nl($f, string $s): void {
-	fwrite($f, $s."\n");
-	fflush($f);
+class Log {
+	private $f = null;
+
+	public function __construct(string $fn) {
+		$this->f = \E\fopen($fn, 'wb');
+	}
+
+	public function ln(string $s): void {
+		fwrite($this->f, $s."\n");
+		fflush($this->f);
+	}
+
+	public function exec(string $c, bool $ign = false): string {
+		fwrite($this->f, "Command: {$c}\n");
+		fflush($this->f);
+		$t = [];
+		$e = 0;
+		exec("{$c} 2>&1", $t, $e);
+		if (!$ign && $e) {
+			throw new \RuntimeException($c, $e);
+		}
+		$t = trim(implode("\n", $t));
+		if ($t) {
+			fwrite($this->f, $t."\n");
+		}
+		fflush($this->f);
+		return $t;
+	}
+
+	public function flush(): void {
+		fflush($this->f);
+	}
+
+	public function close(): void {
+		fclose($this->f);
+	}
 }
 
-function log_exec($f, string $c): string {
-	fwrite($f, "Command: {$c}\n");
-	fflush($f);
-	$t = [];
-	$e = 0;
-	exec("{$c} 2>&1", $t, $e);
-	if ($e) {
-		throw new RuntimeException($c, $e);
+function split(string $delim, string $str): array {
+	if (empty($str)) {
+		return [];
 	}
-	$t = trim(implode("\n", $t));
-	fwrite($f, $t."\n");
-	fflush($f);
-	return $t;
+	return \explode($delim, $str);
 }
