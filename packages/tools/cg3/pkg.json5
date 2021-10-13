@@ -1,4 +1,7 @@
 {
 	url: 'GrammarSoft/',
 	version_in: 'src/version.hpp',
+	excludes: [
+		'scripts/*.php',
+		],
 }

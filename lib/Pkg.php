@@ -195,7 +195,7 @@ function mirror_repo(array $conf) {
 	return $rev;
 }
 
-function make_tarball(array $conf, string $rev) {
+function make_tarball(array $conf, string $rev, bool $release = false) {
 	$pwd = getcwd();
 	$fl = substr($conf['name'], 0, 1).substr($conf['name'], -1);
 	@mkdir($_ENV['WOLFPKG_WORKDIR']."/packages/{$fl}/{$conf['name']}/logs/tars", 0711, true);
@@ -339,7 +339,7 @@ function make_tarball(array $conf, string $rev) {
 		$keep = false;
 		foreach ($includes as $p) {
 			if (preg_match("@^$p$@", $f)) {
-				$log->ln("Keeping '$f'");
+				$log->ln("Keeping '{$f}'");
 				$keep = true;
 				break;
 			}
@@ -348,63 +348,111 @@ function make_tarball(array $conf, string $rev) {
 			continue;
 		}
 		foreach ($excludes as $p) {
-			if (preg_match("@^$p$@", $f)) {
+			if (preg_match("@^{$p}$@", $f)) {
 				if (is_file($f)) {
-					$log->ln("Removing file '$f'");
+					$log->ln("Removing file '{$f}'");
 					unlink($f);
 				}
 				else {
-					$log->exec("rm -rfv '$f'");
+					$log->exec("rm -rfv '{$f}'");
 				}
 			}
 		}
 	}
-	while ($o = $log->exec('find . -type d -empty -print0 | LC_ALL=C sort -zr | xargs -0rn1 rm -rfv')) {
-	}
 
+	// Remove symlinks that are unresolvable when relative to their folder
+	// Side effect: Removes absolute symlinks
 	$sls = \Utils\split("\n", $log->exec('find . -type l'));
 	foreach ($sls as $l) {
 		$d = dirname($l);
 		$s = readlink($l);
 		if (!file_exists("{$d}/{$s}")) {
-			$log->ln("Unresolvable symlink: $l");
+			$log->ln("Unresolvable symlink: {$l}");
 			unlink($l);
 		}
 	}
 
-	# OS tools should only try to use OS binaries
-	$files = \Utils\split("\n", trim($log->exec("grep -rl '^#!/usr/bin/env'", true)));
+	// Remove all empty folders
+	while ($o = $log->exec('find . -type d -empty -print0 | LC_ALL=C sort -zr | xargs -0rn1 rm -rfv')) {
+	}
+
+	// OS tools should only try to use OS binaries
+	$files = \Utils\split("\n", trim($log->exec_null("grep -srl '^#!/usr/bin/env'; pcregrep --buffer-size=32M -srl '^#!/(usr/local|opt/local)/bin/' *")));
 	foreach ($files as $f) {
 		$data = file_get_contents($f);
+		if (strpos($data, '#!/usr/local/') !== false) {
+			$log->ln("Fixing /usr/local shebang in '{$f}'");
+			$data = preg_replace('~^#!/usr/local/~m', '#!/usr/', $data);
+		}
+		if (strpos($data, '#!/opt/local/') !== false) {
+			$log->ln("Fixing /opt/local shebang in '{$f}'");
+			$data = preg_replace('~^#!/opt/local/~m', '#!/usr/', $data);
+		}
 		if (strpos($data, '#!/usr/bin/env perl') !== false) {
-			$log->ln("Fixing Perl shebang in '$f'");
+			$log->ln("Fixing Perl shebang in '{$f}'");
 			$data = preg_replace('~^#!/usr/bin/env perl~m', '#!/usr/bin/perl', $data);
 		}
 		if (strpos($data, '#!/usr/bin/env python') !== false) {
-			$log->ln("Fixing Python shebang in '$f'");
+			$log->ln("Fixing Python shebang in '{$f}'");
 			$data = preg_replace('~^#!/usr/bin/env python~m', '#!/usr/bin/python', $data);
 		}
 		if (strpos($data, '#!/usr/bin/env bash') !== false) {
-			$log->ln("Fixing Bash shebang in '$f'");
+			$log->ln("Fixing Bash shebang in '{$f}'");
 			$data = preg_replace('~^#!/usr/bin/env bash~m', '#!/usr/bin/bash', $data);
 		}
 		file_put_contents($f, $data);
 	}
 
-	# Replace @APERTIUM_AUTO_VERSION@ with git/svn revision
-	$files = \Utils\split("\n", trim($log->exec("grep -rl '@APERTIUM_AUTO_VERSION@'", true)));
+	// Replace @APERTIUM_AUTO_VERSION@ with git/svn revision
+	$files = \Utils\split("\n", trim($log->exec_null("grep -srl '@APERTIUM_AUTO_VERSION@'")));
 	foreach ($files as $f) {
 		$data = file_get_contents($f);
 		$data = str_replace('@APERTIUM_AUTO_VERSION@', $tar['rev'], $data);
 		file_put_contents($f, $data);
 	}
 
-	$tar['thash'] = \Utils\sha256_b64x($rev.var_export($tar, true));
+	$tar['version_long'] = $tar['version'];
+	if (!$release) {
+		if ($conf['vcs'] === 'git') {
+			$tar['version_long'] .= "+g{$tar['count']}~".substr($tar['rev'], 0, 8);
+		}
+		else {
+			$tar['version_long'] .= "+s{$tar['rev']}";
+		}
+	}
+	$tar['folder'] = $conf['name'].'-'.$tar['version_long'];
+	$mtime = date('Y-m-d H:i:s', $tar['stamp']);
+
+	\E\chdir('..');
+	$log->exec("rm -rf '{$tar['folder']}'");
+
+	\E\rename($rev, $tar['folder']);
+	$log->exec("find '{$tar['folder']}' ! -type d | LC_ALL=C sort > orig.lst");
+	$log->exec("tar -I 'xz -T0 -4' --no-acls --no-xattrs '--mtime={$mtime}' -cf '{$conf['name']}_{$tar['version_long']}.orig.tar.xz' -T orig.lst");
+	\E\rename($tar['folder'], $rev);
+
+	$tar['thash'] = \Utils\sha256_file_b64x("{$conf['name']}_{$tar['version_long']}.orig.tar.xz");
+	$tar['thash_dots'] = $tar['thash'];
+	\E\rename("{$conf['name']}_{$tar['version_long']}.orig.tar.xz", $_ENV['WOLFPKG_WORKDIR']."/packages/{$fl}/{$conf['name']}/tars/{$conf['name']}_{$tar['version_long']}.orig.tar.xz");
+
+	$rpmv = preg_replace('@[+~]@', '.', $tar['version_long']);
+	if ($rpmv !== $tar['version_long']) {
+		$tar['version_long_dots'] = $rpmv;
+		$tar['folder_dots'] = $conf['name'].'-'.$tar['version_long_dots'];
+
+		$log->exec("rm -rf '{$tar['folder_dots']}'");
+		\E\rename($rev, $tar['folder_dots']);
+		$log->exec("find '{$conf['name']}-{$tar['version_long_dots']}' ! -type d | LC_ALL=C sort > orig.lst");
+		$log->exec("tar -I 'xz -T0 -4' --no-acls --no-xattrs '--mtime={$mtime}' -cf '{$conf['name']}_{$tar['version_long_dots']}.orig.tar.xz' -T orig.lst");
+		\E\rename($tar['folder_dots'], $rev);
+		$tar['thash_dots'] = \Utils\sha256_file_b64x("{$conf['name']}_{$tar['version_long_dots']}.orig.tar.xz");
+		\E\rename("{$conf['name']}_{$tar['version_long_dots']}.orig.tar.xz", $_ENV['WOLFPKG_WORKDIR']."/packages/{$fl}/{$conf['name']}/tars/{$conf['name']}_{$tar['version_long_dots']}.orig.tar.xz");
+	}
 
 	$db = \Db\get_rw();
 	$db->beginTransaction();
 	$db->prepexec("DELETE FROM package_tar WHERE p_id = ? AND r_rev = ?", [$conf['id'], $rev]);
-	$db->prepexec("INSERT INTO package_tar (p_id, r_rev, t_rev, t_stamp, t_count, t_version, t_thash) VALUES (?, ?, ?, ?, ?, ?, ?)", [$conf['id'], $rev, $tar['rev'], $tar['stamp'], $tar['count'], $tar['version'], $tar['thash']]);
+	$db->prepexec("INSERT INTO package_tar (p_id, r_rev, t_rev, t_stamp, t_count, t_version, t_thash, t_thash_dots) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", [$conf['id'], $rev, $tar['rev'], $tar['stamp'], $tar['count'], $tar['version_long'], $tar['thash'], $tar['thash_dots']]);
 	$db->commit();
 
 	$log->close();

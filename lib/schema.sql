@@ -36,8 +36,9 @@ CREATE TABLE package_tar (
 	t_count INTEGER NOT NULL, -- local monotonically increasing revision number
 	t_version TEXT NOT NULL,
 	t_thash TEXT NOT NULL, -- sha256 hash of the sorted tarball
+	t_thash_dots TEXT NOT NULL, -- sha256 hash of the sorted tarball, with . instead of +~
 	PRIMARY KEY(p_id, r_rev),
-	FOREIGN KEY(p_id, r_rev) REFERENCES package_repo(p_id, r_rev) ON UPDATE CASCADE ON DELETE CASCADE
+	FOREIGN KEY(p_id) REFERENCES packages(p_id) ON UPDATE CASCADE ON DELETE CASCADE
 	) WITHOUT ROWID;
 
 -- The type of packaging recipe, such as Debian vs. RPM.

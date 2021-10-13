@@ -22,9 +22,15 @@ function sha256_file($file, bool $bin = true): string {
 	if (is_array($file)) {
 		$h = hash_init('sha256');
 		foreach ($file as $f) {
+			if (!file_exists($f)) {
+				throw new \RuntimeException("No such file '{$f}'");
+			}
 			hash_update_file($h, $f);
 		}
 		return hash_final($h, $bin);
+	}
+	if (!file_exists($file)) {
+		throw new \RuntimeException("No such file '{$file}'");
 	}
 	return hash_file('sha256', $file, $bin);
 }
@@ -68,6 +74,10 @@ class Log {
 		}
 		fflush($this->f);
 		return $t;
+	}
+
+	public function exec_null(string $c): string {
+		return $this->exec($c, true);
 	}
 
 	public function flush(): void {

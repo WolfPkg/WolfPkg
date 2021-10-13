@@ -8,6 +8,12 @@ function chdir(string $d): void {
 	}
 }
 
+function rename(string $f, string $t): void {
+	if (\rename($f, $t) === false) {
+		throw new RuntimeException("rename('{$f}', '{$t}')");
+	}
+}
+
 function file_get_contents(string $d): string {
 	$rv = \file_get_contents($d);
 	if ($rv === false) {

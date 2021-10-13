@@ -6,7 +6,29 @@ require_once __DIR__.'/../lib/autoconf.php';
 
 \E\chdir($_ENV['WOLFPKG_ROOT']);
 
-if (empty($argv[1])) {
+$rest = 0;
+$opts = getopt('p:v:r', [], $rest);
+$argv = array_slice($argv, max($rest, 1));
+
+$package = '';
+if (array_key_exists('p', $opts)) {
+	$package = $opts['p'];
+}
+else {
+	$package = $argv[0] ?? null;
+	array_shift($argv);
+}
+$rev = null;
+if (array_key_exists('v', $opts)) {
+	$rev = $opts['v'];
+}
+else {
+	$rev = $argv[0] ?? null;
+	array_shift($argv);
+}
+$release = array_key_exists('r', $opts);
+
+if (empty($package)) {
 	echo "Must provide at least package name!\n";
 	exit(-1);
 }
@@ -14,12 +36,12 @@ if (empty($argv[1])) {
 $db = \Db\get_rw();
 
 $exps = [];
-$stm = $db->prepexec("SELECT p_id, p_name, p_chash, r_rev FROM packages NATURAL JOIN package_repo WHERE p_name = ?", [$argv[1]]);
+$stm = $db->prepexec("SELECT p_id, p_name, p_chash, r_rev FROM packages NATURAL JOIN package_repo WHERE p_name = ?", [$package]);
 while ($row = $stm->fetch()) {
 	$exps[$row['p_name']] = $row;
 }
 if (empty($exps)) {
-	printf("No such package '%s'!\n", $argv[1]);
+	printf("No such package '%s'!\n", $package);
 	exit(-1);
 }
 
@@ -28,7 +50,7 @@ foreach ($pkgs as $path => $pkname) {
 	if (empty($exps[$pkname])) {
 		continue;
 	}
-	if ($pkname !== $argv[1]) {
+	if ($pkname !== $package) {
 		continue;
 	}
 
@@ -36,7 +58,7 @@ foreach ($pkgs as $path => $pkname) {
 	$conf = \Pkg\load_conf($cpath, $pkname);
 	$conf['id'] = $exps[$pkname]['p_id'];
 	$conf['chash'] = $exps[$pkname]['p_chash'];
-	$rev = $argv[2] ?? $exps[$pkname]['r_rev'];
+	$rev = $rev ?? $exps[$pkname]['r_rev'];
 
 	if (!$conf['enabled']) {
 		printf("Package %s disabled!\n", $pkname);
@@ -44,6 +66,6 @@ foreach ($pkgs as $path => $pkname) {
 	}
 
 	echo "Making tarball for {$pkname} @ {$rev}:\n";
-	$rev = \Pkg\make_tarball($conf, $rev);
+	$rev = \Pkg\make_tarball($conf, $rev, $release);
 	echo var_export($rev, true), "\n";
 }

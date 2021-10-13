@@ -1,0 +1,16 @@
+#!/usr/bin/env php
+<?php
+declare(strict_types=1);
+
+require_once __DIR__.'/../lib/autoconf.php';
+
+if (!empty($argv[1])) {
+	echo \Utils\sha256_file_b64x($argv[1])."\n";
+}
+else {
+	$h = hash_init('sha256');
+	while (($buf = fgets(STDIN, 1024*1024)) !== false) {
+		hash_update($h, $buf);
+	}
+	echo \Utils\b64x(hash_final($h, true))."\n";
+}
