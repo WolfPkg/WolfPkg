@@ -1,6 +1,7 @@
 {
 	"require": {
 		"colinodell/json5": "^2",
-		"tdc/pdo": "^1"
+		"tdc/pdo": "^1",
+		"ulrichsg/getopt-php": "^4"
     }
 }

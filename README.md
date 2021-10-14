@@ -4,4 +4,4 @@
 
 Needs:
 * pcregrep
-* pbzip2
+* xz

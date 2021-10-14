@@ -1,0 +1,37 @@
+https://pkg.pjj.cc/
+	Per-project: /p/hfst/{debian,fedora,conda,macos,windows}/{edge,nightly,release}/
+	Per-distro: /d/{debian,fedora,conda,macos,windows}/{edge,nightly,release}/
+	#Per-arch: /a/{x86,amd64,arm64}/{debian,fedora,conda,macos,windows}/{edge,nightly,release}/
+
+Builder asks web for job, with params {platform(s), native arch(s), emulated arch(s), RAM} and gets a folder path back.
+Builder rsyncs folder down and starts the build.
+Builder uploads completed build outputs, then manifest, then signals web that there are new files.
+
+Builds
+	Packages
+	scan-build
+	Install & Upgrade tests
+
+Publish only if to-be-pushlished is HEAD or latest release
+
+centos-release-scl
+	devtoolset-9-gcc-c++
+	devtoolset-9-make
+
+yum -y --installroot=/target --releasever=7 install yum centos-release
+dnf --setopt=install_weak_deps=False --best -y --installroot=/target --releasever=8 install dnf centos-release
+dnf --setopt=install_weak_deps=False --best -y --installroot=/target --releasever=8 install dnf rocky-release
+zypper --installroot /home/tino/wolfpkg/opensuse/leap/root --gpg-auto-import-keys -n install rpm zypper bash
+
+
+dh_builddeb -- --nocheck
+
+===
+
+Cron, Push, or PR triggers source collection
+
+If a build-dep is in a queue that will publish, defer self until it has been published or failed
+
+===
+
+Builders identify themselves via shared secret token

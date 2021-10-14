@@ -192,10 +192,14 @@ function mirror_repo(array $conf) {
 	$db->prepexec("DELETE FROM package_repo WHERE p_id = ? AND r_count > ?", [$conf['id'], $rev['count']]);
 	$db->commit();
 
+	if (!$rev['changed']) {
+		//$log->unlink();
+	}
+
 	return $rev;
 }
 
-function make_tarball(array $conf, string $rev, bool $release = false) {
+function make_tarball(array $conf, string $rev, string $version = 'long'): array {
 	$pwd = getcwd();
 	$fl = substr($conf['name'], 0, 1).substr($conf['name'], -1);
 	@mkdir($_ENV['WOLFPKG_WORKDIR']."/packages/{$fl}/{$conf['name']}/logs/tars", 0711, true);
@@ -259,58 +263,61 @@ function make_tarball(array $conf, string $rev, bool $release = false) {
 			];
 	}
 
-	$major = 0;
-	$minor = 0;
-	$patch = 0;
+	$tar['version'] = $version;
+	if ($version === 'long' || $version === 'short') {
+		$major = 0;
+		$minor = 0;
+		$patch = 0;
 
-	$data = file_get_contents($conf['version_in']);
-	$version = '';
-	if (preg_match('@_VERSION_MAJOR\], \[(\d+)\].*?_VERSION_MINOR\], \[(\d+)\].*?_VERSION_PATCH\], \[(\d+)\]@s', $data, $m)) {
-		$log->ln('Found m4 _VERSION_MAJOR/MINOR/PATCH version');
-		$version = "{$m[1]}.{$m[2]}.{$m[3]}";
-	}
-	else if (preg_match('@_VERSION_MAJOR = (\d+);.*?_VERSION_MINOR = (\d+);.*?_VERSION_PATCH = (\d+);@s', $data, $m)) {
-		$log->ln('Found _VERSION_MAJOR/MINOR/PATCH version');
-		$version = "{$m[1]}.{$m[2]}.{$m[3]}";
-	}
-	else if (preg_match('@__version__ = "([\d.]+)"@s', $data, $m) || preg_match('@__version__ = \'([\d.]+)\'@s', $data, $m)) {
-		$log->ln('Found __version__ version');
-		$version = $m[1];
-	}
-	else if (preg_match('@AC_INIT.*?\[([\d.]+)[^\]]*\]@s', $data, $m)) {
-		$log->ln('Found AC_INIT version');
-		$version = $m[1];
-	}
-	else if (preg_match('@\n\s*VERSION.*?([\d.]+)@s', $data, $m) || preg_match('@VERSION.*?([\d.]+)@s', $data, $m)) {
-		$log->ln('Found VERSION version');
-		$version = $m[1];
-	}
-	else if (preg_match('@PACKAGE_VERSION\s*=\s*"([\d.]+)@s', $data, $m)) {
-		$log->ln('Found PACKAGE_VERSION version');
-		$version = $m[1];
-	}
-	else if (preg_match('@\nVersion ([\d.]+)@s', $data, $m)) {
-		$log->ln('Found Version version');
-		$version = $m[1];
-	}
-	else {
-		throw new \RuntimeException('No version found!');
-	}
+		$data = file_get_contents($conf['version_in']);
+		$ver_in = '';
+		if (preg_match('@_VERSION_MAJOR\], \[(\d+)\].*?_VERSION_MINOR\], \[(\d+)\].*?_VERSION_PATCH\], \[(\d+)\]@s', $data, $m)) {
+			$log->ln('Found m4 _VERSION_MAJOR/MINOR/PATCH version');
+			$ver_in = "{$m[1]}.{$m[2]}.{$m[3]}";
+		}
+		else if (preg_match('@_VERSION_MAJOR = (\d+);.*?_VERSION_MINOR = (\d+);.*?_VERSION_PATCH = (\d+);@s', $data, $m)) {
+			$log->ln('Found _VERSION_MAJOR/MINOR/PATCH version');
+			$ver_in = "{$m[1]}.{$m[2]}.{$m[3]}";
+		}
+		else if (preg_match('@__version__ = "([\d.]+)"@s', $data, $m) || preg_match('@__version__ = \'([\d.]+)\'@s', $data, $m)) {
+			$log->ln('Found __version__ version');
+			$ver_in = $m[1];
+		}
+		else if (preg_match('@AC_INIT.*?\[([\d.]+)[^\]]*\]@s', $data, $m)) {
+			$log->ln('Found AC_INIT version');
+			$ver_in = $m[1];
+		}
+		else if (preg_match('@\n\s*VERSION.*?([\d.]+)@s', $data, $m) || preg_match('@VERSION.*?([\d.]+)@s', $data, $m)) {
+			$log->ln('Found VERSION version');
+			$ver_in = $m[1];
+		}
+		else if (preg_match('@PACKAGE_VERSION\s*=\s*"([\d.]+)@s', $data, $m)) {
+			$log->ln('Found PACKAGE_VERSION version');
+			$ver_in = $m[1];
+		}
+		else if (preg_match('@\nVersion ([\d.]+)@s', $data, $m)) {
+			$log->ln('Found Version version');
+			$ver_in = $m[1];
+		}
+		else {
+			throw new \RuntimeException('No version found!');
+		}
 
-	if (preg_match('@^(\d+)$@', $version, $m)) {
-		$patch = $m[1];
-	}
-	else if (preg_match('@^(\d+)\.(\d+)$@', $version, $m)) {
-		$major = $m[1];
-		$minor = $m[2];
-	}
-	else if (preg_match('@^(\d+)\.(\d+)\.(\d+)$@', $version, $m)) {
-		$major = $m[1];
-		$minor = $m[2];
-		$patch = $m[3];
-	}
+		if (preg_match('@^(\d+)$@', $ver_in, $m)) {
+			$patch = $m[1];
+		}
+		else if (preg_match('@^(\d+)\.(\d+)$@', $ver_in, $m)) {
+			$major = $m[1];
+			$minor = $m[2];
+		}
+		else if (preg_match('@^(\d+)\.(\d+)\.(\d+)$@', $ver_in, $m)) {
+			$major = $m[1];
+			$minor = $m[2];
+			$patch = $m[3];
+		}
 
-	$tar['version'] = "{$major}.{$minor}.{$patch}";
+		$tar['version'] = "{$major}.{$minor}.{$patch}";
+	}
 
 	$includes = ['test/tests\.json', 'test/.*-input\.txt', 'test/.*-expected\.txt', 'test/.*-gold\.txt'];
 	$excludes = ['\.svn.*', '\.git.*', '\.gut.*', '\.circleci.*', '\.travis.*', '\.clang.*', '\.editorconfig', '\.readthedocs.*', 'autogen\.sh', 'cmake\.sh', 'CONTRIBUTING.*', 'INSTALL', 'Jenkinsfile'];
@@ -333,7 +340,7 @@ function make_tarball(array $conf, string $rev, bool $release = false) {
 		$log->ln('Excludes: '.implode(' ', $excludes));
 	}
 
-	$files = \Utils\split("\n", trim(shell_exec('find . ! -type d')));
+	$files = \Utils\split("\n", trim(shell_exec('find . -not -type d')));
 	foreach ($files as $f) {
 		$f = substr($f, 2);
 		$keep = false;
@@ -411,48 +418,47 @@ function make_tarball(array $conf, string $rev, bool $release = false) {
 		file_put_contents($f, $data);
 	}
 
-	$tar['version_long'] = $tar['version'];
-	if (!$release) {
+	if ($version === 'long') {
 		if ($conf['vcs'] === 'git') {
-			$tar['version_long'] .= "+g{$tar['count']}~".substr($tar['rev'], 0, 8);
+			$tar['version'] .= "+g{$tar['count']}~".substr($tar['rev'], 0, 8);
 		}
 		else {
-			$tar['version_long'] .= "+s{$tar['rev']}";
+			$tar['version'] .= "+s{$tar['rev']}";
 		}
 	}
-	$tar['folder'] = $conf['name'].'-'.$tar['version_long'];
+	$folder = $conf['name'].'-'.$tar['version'];
 	$mtime = date('Y-m-d H:i:s', $tar['stamp']);
 
 	\E\chdir('..');
-	$log->exec("rm -rf '{$tar['folder']}'");
+	$log->exec("rm -rf '{$folder}'");
 
-	\E\rename($rev, $tar['folder']);
-	$log->exec("find '{$tar['folder']}' ! -type d | LC_ALL=C sort > orig.lst");
-	$log->exec("tar -I 'xz -T0 -4' --no-acls --no-xattrs '--mtime={$mtime}' -cf '{$conf['name']}_{$tar['version_long']}.orig.tar.xz' -T orig.lst");
-	\E\rename($tar['folder'], $rev);
+	\E\rename($rev, $folder);
+	$log->exec("find '{$folder}' ! -type d | LC_ALL=C sort > orig.lst");
+	$log->exec("tar -I 'xz -T0 -4' --owner=0 --group=0 --no-acls --no-selinux --no-xattrs '--mtime={$mtime}' -cf '{$conf['name']}_{$tar['version']}.tar.xz' -T orig.lst");
+	\E\rename($folder, $rev);
 
-	$tar['thash'] = \Utils\sha256_file_b64x("{$conf['name']}_{$tar['version_long']}.orig.tar.xz");
+	$tar['thash'] = \Utils\sha256_file_b64x("{$conf['name']}_{$tar['version']}.tar.xz");
 	$tar['thash_dots'] = $tar['thash'];
-	\E\rename("{$conf['name']}_{$tar['version_long']}.orig.tar.xz", $_ENV['WOLFPKG_WORKDIR']."/packages/{$fl}/{$conf['name']}/tars/{$conf['name']}_{$tar['version_long']}.orig.tar.xz");
+	\E\rename("{$conf['name']}_{$tar['version']}.tar.xz", $_ENV['WOLFPKG_WORKDIR']."/packages/{$fl}/{$conf['name']}/tars/{$tar['thash']}.tar.xz");
 
-	$rpmv = preg_replace('@[+~]@', '.', $tar['version_long']);
-	if ($rpmv !== $tar['version_long']) {
-		$tar['version_long_dots'] = $rpmv;
-		$tar['folder_dots'] = $conf['name'].'-'.$tar['version_long_dots'];
+	$tar['version_dots'] = preg_replace('@[+~]@', '.', $tar['version']);
+	if ($tar['version_dots'] !== $tar['version']) {
+		$folder = $conf['name'].'-'.$tar['version_dots'];
+		$log->exec("rm -rf '{$folder}'");
 
-		$log->exec("rm -rf '{$tar['folder_dots']}'");
-		\E\rename($rev, $tar['folder_dots']);
-		$log->exec("find '{$conf['name']}-{$tar['version_long_dots']}' ! -type d | LC_ALL=C sort > orig.lst");
-		$log->exec("tar -I 'xz -T0 -4' --no-acls --no-xattrs '--mtime={$mtime}' -cf '{$conf['name']}_{$tar['version_long_dots']}.orig.tar.xz' -T orig.lst");
-		\E\rename($tar['folder_dots'], $rev);
-		$tar['thash_dots'] = \Utils\sha256_file_b64x("{$conf['name']}_{$tar['version_long_dots']}.orig.tar.xz");
-		\E\rename("{$conf['name']}_{$tar['version_long_dots']}.orig.tar.xz", $_ENV['WOLFPKG_WORKDIR']."/packages/{$fl}/{$conf['name']}/tars/{$conf['name']}_{$tar['version_long_dots']}.orig.tar.xz");
+		\E\rename($rev, $folder);
+		$log->exec("find '{$conf['name']}-{$tar['version_dots']}' ! -type d | LC_ALL=C sort > orig.lst");
+		$log->exec("tar -I 'xz -T0 -4' --owner=0 --group=0 --no-acls --no-selinux --no-xattrs '--mtime={$mtime}' -cf '{$conf['name']}_{$tar['version_dots']}.tar.xz' -T orig.lst");
+		\E\rename($folder, $rev);
+
+		$tar['thash_dots'] = \Utils\sha256_file_b64x("{$conf['name']}_{$tar['version_dots']}.tar.xz");
+		\E\rename("{$conf['name']}_{$tar['version_dots']}.tar.xz", $_ENV['WOLFPKG_WORKDIR']."/packages/{$fl}/{$conf['name']}/tars/{$tar['thash_dots']}.tar.xz");
 	}
 
 	$db = \Db\get_rw();
 	$db->beginTransaction();
-	$db->prepexec("DELETE FROM package_tar WHERE p_id = ? AND r_rev = ?", [$conf['id'], $rev]);
-	$db->prepexec("INSERT INTO package_tar (p_id, r_rev, t_rev, t_stamp, t_count, t_version, t_thash, t_thash_dots) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", [$conf['id'], $rev, $tar['rev'], $tar['stamp'], $tar['count'], $tar['version_long'], $tar['thash'], $tar['thash_dots']]);
+	$db->prepexec("DELETE FROM package_tars WHERE p_id = ? AND r_rev = ? AND t_version = ?", [$conf['id'], $rev, $tar['version']]);
+	$db->prepexec("INSERT INTO package_tars (p_id, r_rev, t_rev, t_stamp, t_count, t_version, t_thash, t_version_dots, t_thash_dots) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", [$conf['id'], $rev, $tar['rev'], $tar['stamp'], $tar['count'], $tar['version'], $tar['thash'], $tar['version_dots'], $tar['thash_dots']]);
 	$db->commit();
 
 	$log->close();

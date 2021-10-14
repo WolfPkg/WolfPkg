@@ -1,0 +1,30 @@
+#!/usr/bin/env php
+<?php
+declare(strict_types=1);
+
+require_once __DIR__.'/../lib/autoconf.php';
+
+$db = \Db\get_rw();
+$exts = [];
+$stm = $db->prepexec("SELECT t_thash as thash FROM package_tars UNION SELECT t_thash_dots as thash FROM package_tars");
+while ($row = $stm->fetch()) {
+	$exts[$row['thash']] = true;
+}
+
+$tars = \Utils\split("\n", \Utils\exec_null("find '{$_ENV['WOLFPKG_WORKDIR']}/packages' -wholename '*/tars/*.tar.xz' 2>/dev/null"));
+foreach ($tars as $t) {
+	$b = basename($t, '.tar.xz');
+	if (!array_key_exists($b, $exts)) {
+		echo "Removing {$t}\n";
+		unlink($t);
+	}
+}
+
+$logs = \Utils\exec_null("find '{$_ENV['WOLFPKG_WORKDIR']}' -wholename '*/logs/*.log' -mtime +180 -print0 | LC_ALL=C sort -zr | xargs -0r rm -fv 2>/dev/null");
+if ($logs) {
+	echo $logs."\n";
+}
+
+while ($o = \Utils\exec("find '{$_ENV['WOLFPKG_WORKDIR']}' -type d -empty -not -wholename '*/repo.*/*' -print0 | LC_ALL=C sort -zr | xargs -0rn1 rm -rfv 2>/dev/null")) {
+	echo "$o\n";
+}
