@@ -15,7 +15,7 @@ foreach ($pkgs as $p) {
 		echo shell_exec("rm -rf '{$_ENV['WOLFPKG_ROOT']}/packages/{$p[0]}'");
 	}
 	echo shell_exec("mkdir -pv '{$_ENV['WOLFPKG_ROOT']}/packages/{$mp[1]}/'");
-	echo shell_exec("cp -aL --reflink=always '{$p[0]}' '{$_ENV['WOLFPKG_ROOT']}/packages/{$mp[1]}/'");
+	echo shell_exec("cp -aL --reflink=auto '{$p[0]}' '{$_ENV['WOLFPKG_ROOT']}/packages/{$mp[1]}/'");
 
 	$exc = [];
 	if (file_exists("{$p[0]}/exclude.txt")) {

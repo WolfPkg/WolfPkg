@@ -14,7 +14,7 @@ function enum_packages(): array {
 	return $pkgs;
 }
 
-function parse_conf(string $j5, string $pkname, bool $raw = false): array {
+function parse_conf(string $path, string $j5, string $pkname, bool $raw = false): array {
 	$conf = json5_decode($j5, true);
 	if (!$raw) {
 		if (empty($conf['url'])) {
@@ -32,12 +32,14 @@ function parse_conf(string $j5, string $pkname, bool $raw = false): array {
 		$def = [
 			'name' => $pkname,
 			'url' => $conf['url'],
+			'path' => dirname($path),
 			'chroot' => '',
 			'vcs' => 'git',
 			'version_in' => 'configure.ac',
 			'excludes' => [],
 			'non_targets' => [],
 			'min_ram' => 0,
+			// bundle self, bundle deps
 			'enabled' => true,
 			];
 
@@ -62,7 +64,7 @@ function parse_conf(string $j5, string $pkname, bool $raw = false): array {
 }
 
 function load_conf(string $path, string $pkname, bool $raw = false): array {
-	return parse_conf(\E\file_get_contents($path), $pkname, $raw);
+	return parse_conf($path, \E\file_get_contents($path), $pkname, $raw);
 }
 
 function read_control(string $path): string {
@@ -192,10 +194,6 @@ function mirror_repo(array $conf) {
 	$db->prepexec("DELETE FROM package_repo WHERE p_id = ? AND r_count > ?", [$conf['id'], $rev['count']]);
 	$db->commit();
 
-	if (!$rev['changed']) {
-		//$log->unlink();
-	}
-
 	return $rev;
 }
 
@@ -248,7 +246,7 @@ function make_tarball(array $conf, string $rev, string $version = 'long'): array
 		}
 	}
 	else {
-		$log->exec("cp -a --reflink=always '{$_ENV['WOLFPKG_WORKDIR']}/packages/{$fl}/{$conf['name']}/repo.svn' '{$rev}'");
+		$log->exec("cp -a --reflink=auto '{$_ENV['WOLFPKG_WORKDIR']}/packages/{$fl}/{$conf['name']}/repo.svn' '{$rev}'");
 		\E\chdir($rev);
 		$log->exec("svn up --force --accept tf '-r{$rev}'");
 		$log->exec('svn cleanup');

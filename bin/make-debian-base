@@ -1,0 +1,74 @@
+#!/usr/bin/env php
+<?php
+declare(strict_types=1);
+
+require_once __DIR__.'/../lib/autoconf.php';
+
+\E\chdir($_ENV['WOLFPKG_ROOT']);
+
+$getopt = new \GetOpt\GetOpt([
+	['h', 'help', \GetOpt\GetOpt::NO_ARGUMENT, "shows this help"],
+	['p', 'package', \GetOpt\GetOpt::REQUIRED_ARGUMENT, "package name"],
+	['v', 'version', \GetOpt\GetOpt::REQUIRED_ARGUMENT, "tarball version to use"],
+	['b', 'bundle', \GetOpt\GetOpt::NO_ARGUMENT, "enable dependency bundling"],
+	]);
+$getopt->process();
+$opts = $getopt->getOptions();
+
+$version = '';
+if (!empty($opts['version'])) {
+	$version = $opts['version'];
+}
+
+$package = '';
+if (!empty($opts['package'])) {
+	$package = $opts['package'];
+}
+
+$bundle = array_key_exists('bundle', $opts);
+
+if (array_key_exists('help', $opts)) {
+	echo $getopt->getHelpText();
+	exit(-1);
+}
+if (empty($package) || empty($version)) {
+	echo "ERROR: Must provide both package name and version!\n\n";
+	echo $getopt->getHelpText();
+	exit(-1);
+}
+
+$db = \Db\get_rw();
+
+$exps = [];
+$stm = $db->prepexec("SELECT p_id, p_name, p_chash, t_version FROM packages NATURAL JOIN package_tars WHERE p_name = ? AND t_version = ?", [$package, $version]);
+while ($row = $stm->fetch()) {
+	$exps[$row['p_name']] = $row;
+}
+if (empty($exps)) {
+	printf("No such package '%s' @ version '%s'!\n", $package, $version);
+	exit(-1);
+}
+
+$pkgs = \Pkg\enum_packages();
+foreach ($pkgs as $path => $pkname) {
+	if (empty($exps[$pkname])) {
+		continue;
+	}
+	if ($pkname !== $package) {
+		continue;
+	}
+
+	$cpath = "{$path}/pkg.json5";
+	$conf = \Pkg\load_conf($cpath, $pkname);
+	$conf['id'] = $exps[$pkname]['p_id'];
+	$conf['chash'] = $exps[$pkname]['p_chash'];
+
+	if (!$conf['enabled']) {
+		printf("Package %s disabled!\n", $pkname);
+		continue;
+	}
+
+	echo "Making Debian base for {$pkname} @ {$version}:\n";
+	$base = \Build\make_debian_base($conf, $version, $bundle);
+	echo var_export($base, true), "\n";
+}
