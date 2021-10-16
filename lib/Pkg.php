@@ -39,12 +39,17 @@ function parse_conf(string $path, string $j5, string $pkname, bool $raw = false)
 			'excludes' => [],
 			'non_targets' => [],
 			'min_ram' => 0,
-			// bundle self, bundle deps
+			'bundle_self' => false,
+			'bundle_deps' => false,
 			'enabled' => true,
 			];
 
 		if (!preg_match('~^https://github\.com/[^/]+?/[^/]+$~', $def['url'])) {
 			$def['vcs'] = 'svn';
+		}
+		if (preg_match('~/(pairs|languages)/\Q'.$pkname.'\E$~', $path)) {
+			$def['bundle_self'] = true;
+			$def['bundle_deps'] = true;
 		}
 		foreach ($conf as $k => $v) {
 			$def[$k] = $v;
@@ -65,6 +70,18 @@ function parse_conf(string $path, string $j5, string $pkname, bool $raw = false)
 
 function load_conf(string $path, string $pkname, bool $raw = false): array {
 	return parse_conf($path, \E\file_get_contents($path), $pkname, $raw);
+}
+
+function get($pkname) {
+	$db = \Db\get_rw();
+	$pkg = $db->prepexec("SELECT p_id, p_name, p_path, p_chash FROM packages WHERE p_name = ?", [$pkname])->fetchAll();
+	if (empty($pkg)) {
+		return null;
+	}
+	$conf = load_conf($pkg[0]['p_path'], $pkname);
+	$conf['id'] = $pkg[0]['p_id'];
+	$conf['chash'] = $pkg[0]['p_chash'];
+	return $conf;
 }
 
 function read_control(string $path): string {

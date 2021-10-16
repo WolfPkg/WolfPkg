@@ -10,7 +10,7 @@ $getopt = new \GetOpt\GetOpt([
 	['h', 'help', \GetOpt\GetOpt::NO_ARGUMENT, "shows this help"],
 	['p', 'package', \GetOpt\GetOpt::REQUIRED_ARGUMENT, "package name"],
 	['v', 'version', \GetOpt\GetOpt::REQUIRED_ARGUMENT, "tarball version to use"],
-	['b', 'bundle', \GetOpt\GetOpt::NO_ARGUMENT, "enable dependency bundling"],
+	['b', 'bundle', \GetOpt\GetOpt::REQUIRED_ARGUMENT, "bundle dependencies: exact, released, or head"],
 	]);
 $getopt->process();
 $opts = $getopt->getOptions();
@@ -25,7 +25,10 @@ if (!empty($opts['package'])) {
 	$package = $opts['package'];
 }
 
-$bundle = array_key_exists('bundle', $opts);
+$bundle = '';
+if (!empty($opts['bundle'])) {
+	$bundle = $opts['bundle'];
+}
 
 if (array_key_exists('help', $opts)) {
 	echo $getopt->getHelpText();

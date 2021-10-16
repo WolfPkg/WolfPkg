@@ -31,7 +31,6 @@ foreach ($pkgs as $path => $pkname) {
 	$cpath = "{$path}/pkg.json5";
 	$conf = \Pkg\load_conf($cpath, $pkname);
 	$conf['id'] = $exps[$pkname]['p_id'];
-	$conf['path'] = $exps[$pkname]['p_path'];
 	$conf['chash'] = $exps[$pkname]['p_chash'];
 
 	if (!$conf['enabled']) {

@@ -1,3 +1,4 @@
 {
 	url: 'giellalt/giella-shared',
+	bundle_self: true,
 }

@@ -1,3 +1,4 @@
 {
 	url: 'giellalt/',
+	bundle_self: true,
 }
