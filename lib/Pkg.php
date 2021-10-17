@@ -90,6 +90,29 @@ function read_control(string $path): string {
 	return $c;
 }
 
+function get_released(array $conf): string {
+	$rev = trim(\Utils\head($_ENV['WOLFPKG_ROOT']."/{$conf['path']}/debian/changelog"));
+	if (preg_match('@\((?:\d+:)?[\d.]+\+[gs]([^-)]+)@', $rev, $m)) {
+		$rev = $m[1];
+	}
+	else if (preg_match('@\((?:\d+:)?(\d+\.\d+\.\d+)-\d+@', $rev, $m)) {
+		$rev = "v{$m[1]}";
+	}
+	else {
+		throw new \RuntimeException("No usable release version found for {$conf['name']}");
+	}
+
+	$epoch = 0;
+	if (preg_match('@\((\d+:)[\d.]+\+[gs][^-)]+@', $rev, $m) || preg_match('@\((\d+:)\d+\.\d+\.\d+-\d+@', $rev, $m)) {
+		$epoch = intval($m[1]);
+	}
+
+	return [
+		'epoch' => $epoch,
+		'rev' => $rev,
+		];
+}
+
 function get_kinds(): array {
 	$db = \Db\get_rw();
 	$ks = [];
@@ -480,4 +503,28 @@ function make_tarball(array $conf, string $rev, string $version = 'long'): array
 	\E\chdir($pwd);
 
 	return $tar;
+}
+
+function get_tarball(array $conf, string $rev = null, string $version = null): array {
+	$fl = substr($conf['name'], 0, 1).substr($conf['name'], -1);
+
+	$db = \Db\get_rw();
+	$tar = $db->prepexec("SELECT t_thash FROM package_tars WHERE p_id = ? AND t_version = ?", [$conf['id'], $version])->fetchAll();
+	if (!empty($tar[0]['t_thash']) && file_exists($_ENV['WOLFPKG_WORKDIR']."/packages/{$fl}/{$conf['name']}/tars/{$tar[0]['t_thash']}.tar.xz")) {
+		return [
+			'version' => $version,
+			'path' => $_ENV['WOLFPKG_WORKDIR']."/packages/{$fl}/{$conf['name']}/tars/{$tar[0]['t_thash']}.tar.xz",
+			];
+	}
+
+	$repo = mirror_repo($conf);
+	if ($version === 'released') {
+		$rev = get_released($conf)['rev'];
+		$version = 'short';
+	}
+	else if ($version === 'HEAD') {
+		$rev = $repo['rev'];
+		$version = 'long';
+	}
+	$tar = make_tarball($conf, $rev, $version);
 }

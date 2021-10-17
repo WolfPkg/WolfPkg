@@ -21,15 +21,8 @@ function make_debian_base(array $conf, string $version, string $bundle_ver = '')
 
 	$db = \Db\get_rw();
 	$tar = \Pkg\get_tarball($conf, null, $version);
-	/*
-	$tar = $db->prepexec("SELECT t_thash FROM package_tars WHERE p_id = ? AND t_version = ?", [$conf['id'], $version])->fetchAll();
-	if (empty($tar) || empty($tar[0])) {
-		throw new \RuntimeException("No tar for {$conf['name']} @ {$version}");
-	}
-	//*/
-	$tar = $tar['t_thash'];
 
-	$log->exec("cp -av --reflink=auto '{$_ENV['WOLFPKG_WORKDIR']}/packages/{$fl}/{$conf['name']}/tars/{$tar}.tar.xz' './{$conf['name']}_{$version}.tar.xz'");
+	$log->exec("cp -av --reflink=auto '{$_ENV['WOLFPKG_WORKDIR']}/packages/{$fl}/{$conf['name']}/tars/{$tar['path']}.tar.xz' './{$conf['name']}_{$version}.tar.xz'");
 	$log->exec("tar -Jxf '{$conf['name']}_{$version}.tar.xz'");
 	\E\chdir("{$conf['name']}-{$version}");
 

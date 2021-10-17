@@ -146,3 +146,13 @@ function split(string $delim, string $str): array {
 	}
 	return \explode($delim, $str);
 }
+
+function head(string $fn, int $n = 1): string {
+	$f = \E\fopen($fn, 'rb');
+	$ln = '';
+	for ($i = 0 ; $i<$n ; ++$i) {
+		$ln .= fgets($f);
+	}
+	fclose($f);
+	return $ln;
+}
