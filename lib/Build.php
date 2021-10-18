@@ -46,7 +46,7 @@ function make_debian_base(array $conf, string $version, string $bundle_ver = '')
 		$ss = ['override_dh_auto_configure:', 'override_dh_auto_build:'];
 		$withlang = '';
 
-		$do_bundle = function($dep) use ($bundle_ver, &$log, &$bdeps) {
+		$do_bundle = function($dep) use (&$bundle_ver, &$log, &$bdeps) {
 			$log->ln("Maybe bundle {$dep}");
 			preg_match('@\[(.+?)\], \[(.+?)\](?:, \[(.+?)\])?@', $dep, $m);
 			[$n, $p, $v] = [$m[1], $m[2], $m[3]];
