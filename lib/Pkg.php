@@ -47,7 +47,7 @@ function parse_conf(string $path, string $j5, string $pkname, bool $raw = false)
 		if (!preg_match('~^https://github\.com/[^/]+?/[^/]+$~', $def['url'])) {
 			$def['vcs'] = 'svn';
 		}
-		if (preg_match('~/(pairs|languages)/\Q'.$pkname.'\E$~', $path)) {
+		if (preg_match('~/(pairs|languages)/\Q'.$pkname.'\E/~', $path)) {
 			$def['bundle_self'] = true;
 			$def['bundle_deps'] = true;
 		}
@@ -78,14 +78,15 @@ function get($pkname) {
 	if (empty($pkg)) {
 		return null;
 	}
-	$conf = load_conf($pkg[0]['p_path'], $pkname);
+	$conf = load_conf($_ENV['WOLFPKG_ROOT']."/{$pkg[0]['p_path']}/pkg.json5", $pkname);
 	$conf['id'] = $pkg[0]['p_id'];
 	$conf['chash'] = $pkg[0]['p_chash'];
+	$conf['path'] = $pkg[0]['p_path'];
 	return $conf;
 }
 
 function read_control(string $path): string {
-	$c = \E\file_get_contents("{$path}/debian/control");
+	$c = \E\file_get_contents($path);
 	$c = preg_replace('~,[\s\n]+~', ', ', $c);
 	return $c;
 }
@@ -124,14 +125,19 @@ function get_kinds(): array {
 }
 
 function mirror_repo(array $conf) {
-	$rev = false;
 	$pwd = getcwd();
 	$fl = substr($conf['name'], 0, 1).substr($conf['name'], -1);
 	@mkdir($_ENV['WOLFPKG_WORKDIR']."/packages/{$fl}/{$conf['name']}/logs/repo", 0711, true);
 	\E\chdir($_ENV['WOLFPKG_WORKDIR']."/packages/{$fl}/{$conf['name']}");
 
 	$stamp = date('Ymd-His');
-	$log = new \Utils\Log($_ENV['WOLFPKG_WORKDIR']."/packages/{$fl}/{$conf['name']}/logs/repo/{$stamp}.log");
+	$rev = [
+		'log' => $_ENV['WOLFPKG_WORKDIR']."/packages/{$fl}/{$conf['name']}/logs/repo/{$stamp}.log",
+		'rev' => '',
+		'stamp' => 0,
+		'count' => 0,
+		];
+	$log = new \Utils\Log($rev['log']);
 	$log->ln("URL: {$conf['url']}");
 	$log->ln('VCS: '.$conf['vcs']);
 
@@ -160,14 +166,12 @@ function mirror_repo(array $conf) {
 		$log->exec('git prune');
 
 		$default = $log->exec("git remote show origin | grep 'HEAD branch' | egrep -o '([^ ]+)\$'");
-		$rev = $log->exec("git log '--date=format-local:%Y-%m-%d %H:%M:%S' --first-parent '--format=format:%H%x09%ad' -n1 '{$default}'");
+		$n_rev = $log->exec("git log '--date=format-local:%Y-%m-%d %H:%M:%S' --first-parent '--format=format:%H%x09%ad' -n1 '{$default}'");
 		$cnt = intval($log->exec("git log '--format=format:%H' '{$default}' | sort | uniq | wc -l"));
-		$rev = explode("\t", $rev);
-		$rev = [
-			'rev' => $rev[0],
-			'stamp' => strtotime($rev[1]),
-			'count' => $cnt,
-			];
+		$n_rev = explode("\t", $n_rev);
+		$rev['rev'] = $n_rev[0];
+		$rev['stamp'] = strtotime($n_rev[1]);
+		$rev['count'] = $cnt;
 	}
 	else {
 		$retried = false;
@@ -198,19 +202,17 @@ function mirror_repo(array $conf) {
 			}
 		}
 
-		$rev = $log->exec('svn info --show-item last-changed-revision && svn info --show-item last-changed-date');
-		$rev = explode("\n", $rev);
-		$rev = [
-			'rev' => intval($rev[0]),
-			'stamp' => strtotime($rev[1]),
-			'count' => intval($rev[0]),
-			];
+		$n_rev = $log->exec('svn info --show-item last-changed-revision && svn info --show-item last-changed-date');
+		$n_rev = explode("\n", $rev);
+		$rev['rev'] = intval($n_rev[0]);
+		$rev['stamp'] = strtotime($n_rev[1]);
+		$rev['count'] = intval($n_rev[0]);
 	}
 
 	$log->close();
 	\E\chdir($pwd);
 
-	if ($rev === false) {
+	if (empty($rev['rev'])) {
 		return $rev;
 	}
 
@@ -223,7 +225,7 @@ function mirror_repo(array $conf) {
 	if (!empty($orev)) {
 		$orev = $orev[0];
 		if ($orev['r_thash'] !== $rev['thash']) {
-			$db->prepexec("UPDATE package_repo SET r_rev = ?, r_stamp = ?, r_count = ?, r_thash = ?, r_version = '' WHERE p_id = ? AND r_rev = ?", [$rev['rev'], $rev['stamp'], $rev['count'], $rev['thash'], $conf['id'], $rev['rev']]);
+			$db->prepexec("UPDATE package_repo SET r_rev = ?, r_stamp = ?, r_count = ?, r_thash = ? WHERE p_id = ? AND r_rev = ?", [$rev['rev'], $rev['stamp'], $rev['count'], $rev['thash'], $conf['id'], $rev['rev']]);
 			$rev['changed'] = true;
 		}
 	}
@@ -247,12 +249,14 @@ function make_tarball(array $conf, string $rev, string $version = 'long'): array
 	\E\chdir($_ENV['WOLFPKG_WORKDIR']."/tmp/{$fl}/{$conf['name']}");
 
 	$stamp = date('Ymd-His');
-	$log = new \Utils\Log($_ENV['WOLFPKG_WORKDIR']."/packages/{$fl}/{$conf['name']}/logs/tars/{$stamp}.log");
+	$tar = [
+		'log' => $_ENV['WOLFPKG_WORKDIR']."/packages/{$fl}/{$conf['name']}/logs/tars/{$stamp}.log",
+		];
+	$log = new \Utils\Log($tar['log']);
 	$log->ln('VCS: '.$conf['vcs']);
 	$log->ln('Rev: '.$rev);
 
 	$log->exec("rm -rf '{$rev}'");
-	$tar = [];
 
 	if ($conf['vcs'] === 'git') {
 		$log->exec("git clone --shallow-submodules '{$_ENV['WOLFPKG_WORKDIR']}/packages/{$fl}/{$conf['name']}/repo.git' '{$rev}'");
@@ -270,11 +274,9 @@ function make_tarball(array $conf, string $rev, string $version = 'long'): array
 		$trev = $log->exec("git log '--date=format-local:%Y-%m-%d %H:%M:%S' --first-parent '--format=format:%H%x09%ad' -n1 {$root}");
 		$tcnt = intval($log->exec("git log '--format=format:%H' {$root} | sort | uniq | wc -l"));
 		$trev = explode("\t", $trev);
-		$tar = [
-			'rev' => $trev[0],
-			'stamp' => strtotime($trev[1]),
-			'count' => $tcnt,
-			];
+		$tar['rev'] = $trev[0];
+		$tar['stamp'] = strtotime($trev[1]);
+		$tar['count'] = $tcnt;
 
 		if ($root) {
 			$rnd = bin2hex(random_bytes(8));
@@ -294,11 +296,10 @@ function make_tarball(array $conf, string $rev, string $version = 'long'): array
 		$log->exec('svn revert -R .');
 
 		$trev = $log->exec('svn info --show-item last-changed-revision && svn info --show-item last-changed-date');
-		$tar = [
-			'rev' => $trev[0],
-			'stamp' => strtotime($trev[1]),
-			'count' => intval($trev[0]),
-			];
+		$trev = explode("\n", $trev);
+		$tar['rev'] = intval($trev[0]);
+		$tar['stamp'] = strtotime($trev[1]);
+		$tar['count'] = intval($trev[0]);
 	}
 
 	$tar['version'] = $version;
@@ -471,13 +472,15 @@ function make_tarball(array $conf, string $rev, string $version = 'long'): array
 	$log->exec("rm -rf '{$folder}'");
 
 	\E\rename($rev, $folder);
-	$log->exec("find '{$folder}' ! -type d | LC_ALL=C sort > orig.lst");
+	$log->exec("find '{$folder}' -not -type d | LC_ALL=C sort > orig.lst");
 	$log->exec("tar -I 'xz -T0 -4' --owner=0 --group=0 --no-acls --no-selinux --no-xattrs '--mtime={$mtime}' -cf '{$conf['name']}_{$tar['version']}.tar.xz' -T orig.lst");
 	\E\rename($folder, $rev);
 
 	$tar['thash'] = \Utils\sha256_file_b64x("{$conf['name']}_{$tar['version']}.tar.xz");
+	$tar['path'] = $_ENV['WOLFPKG_WORKDIR']."/packages/{$fl}/{$conf['name']}/tars/{$tar['thash']}.tar.xz";
 	$tar['thash_dots'] = $tar['thash'];
-	\E\rename("{$conf['name']}_{$tar['version']}.tar.xz", $_ENV['WOLFPKG_WORKDIR']."/packages/{$fl}/{$conf['name']}/tars/{$tar['thash']}.tar.xz");
+	$tar['path_dots'] = $tar['path'];
+	\E\rename("{$conf['name']}_{$tar['version']}.tar.xz", $tar['path']);
 
 	$tar['version_dots'] = preg_replace('@[+~]@', '.', $tar['version']);
 	if ($tar['version_dots'] !== $tar['version']) {
@@ -485,12 +488,13 @@ function make_tarball(array $conf, string $rev, string $version = 'long'): array
 		$log->exec("rm -rf '{$folder}'");
 
 		\E\rename($rev, $folder);
-		$log->exec("find '{$conf['name']}-{$tar['version_dots']}' ! -type d | LC_ALL=C sort > orig.lst");
+		$log->exec("find '{$conf['name']}-{$tar['version_dots']}' -not -type d | LC_ALL=C sort > orig.lst");
 		$log->exec("tar -I 'xz -T0 -4' --owner=0 --group=0 --no-acls --no-selinux --no-xattrs '--mtime={$mtime}' -cf '{$conf['name']}_{$tar['version_dots']}.tar.xz' -T orig.lst");
 		\E\rename($folder, $rev);
 
 		$tar['thash_dots'] = \Utils\sha256_file_b64x("{$conf['name']}_{$tar['version_dots']}.tar.xz");
-		\E\rename("{$conf['name']}_{$tar['version_dots']}.tar.xz", $_ENV['WOLFPKG_WORKDIR']."/packages/{$fl}/{$conf['name']}/tars/{$tar['thash_dots']}.tar.xz");
+		$tar['path_dots'] = $_ENV['WOLFPKG_WORKDIR']."/packages/{$fl}/{$conf['name']}/tars/{$tar['thash_dots']}.tar.xz";
+		\E\rename("{$conf['name']}_{$tar['version_dots']}.tar.xz", $tar['path_dots']);
 	}
 
 	$db = \Db\get_rw();
@@ -509,10 +513,13 @@ function get_tarball(array $conf, string $rev = null, string $version = null): a
 	$fl = substr($conf['name'], 0, 1).substr($conf['name'], -1);
 
 	$db = \Db\get_rw();
-	$tar = $db->prepexec("SELECT t_thash FROM package_tars WHERE p_id = ? AND t_version = ?", [$conf['id'], $version])->fetchAll();
+	$tar = $db->prepexec("SELECT t_thash, t_stamp FROM package_tars WHERE p_id = ? AND t_version = ?", [$conf['id'], $version])->fetchAll();
 	if (!empty($tar[0]['t_thash']) && file_exists($_ENV['WOLFPKG_WORKDIR']."/packages/{$fl}/{$conf['name']}/tars/{$tar[0]['t_thash']}.tar.xz")) {
 		return [
+			'logs' => ['Existing tarball found'],
 			'version' => $version,
+			'thash' => $tar[0]['t_thash'],
+			'stamp' => intval($tar[0]['t_stamp']),
 			'path' => $_ENV['WOLFPKG_WORKDIR']."/packages/{$fl}/{$conf['name']}/tars/{$tar[0]['t_thash']}.tar.xz",
 			];
 	}
@@ -527,4 +534,6 @@ function get_tarball(array $conf, string $rev = null, string $version = null): a
 		$version = 'long';
 	}
 	$tar = make_tarball($conf, $rev, $version);
+	$tar['logs'] = [$repo['log'], $tar['log']];
+	return $tar;
 }

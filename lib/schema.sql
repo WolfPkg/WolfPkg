@@ -42,6 +42,16 @@ CREATE TABLE package_tars (
 	FOREIGN KEY(p_id) REFERENCES packages(p_id) ON UPDATE CASCADE ON DELETE CASCADE
 	) WITHOUT ROWID;
 
+CREATE TABLE package_bases (
+	p_id INTEGER NOT NULL,
+	t_version TEXT NOT NULL,
+	b_bundled TEXT NOT NULL,
+	b_thash TEXT NOT NULL, -- sha256 hash of the sorted source tarball
+	b_chash TEXT NOT NULL, -- sha256 hash of the sorted control tarball
+	PRIMARY KEY(p_id, t_version, b_bundled),
+	FOREIGN KEY(p_id) REFERENCES packages(p_id) ON UPDATE CASCADE ON DELETE CASCADE
+	) WITHOUT ROWID;
+
 -- The type of packaging recipe, such as Debian vs. RPM.
 CREATE TABLE kinds (
 	k_id INTEGER NOT NULL,

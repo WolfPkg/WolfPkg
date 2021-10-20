@@ -35,7 +35,14 @@ function sha256_file($file, bool $bin = true): string {
 		return hash_final($h, $bin);
 	}
 	if (!file_exists($file)) {
-		throw new \RuntimeException("No such file '{$file}'");
+		throw new \RuntimeException("No such file or folder '{$file}'");
+	}
+	if (is_dir($file)) {
+		$hash = substr(exec("find ".escapeshellarg($file)." -type f | LC_ALL=C sort | xargs -r cat | sha256sum"), 0, 64);
+		if ($bin) {
+			$hash = hex2bin($hash);
+		}
+		return $hash;
 	}
 	return hash_file('sha256', $file, $bin);
 }
@@ -75,6 +82,10 @@ class Log {
 	public function __construct(string $fn) {
 		$this->fn = $fn;
 		$this->f = \E\fopen($fn, 'wb');
+	}
+
+	public function fn(): string {
+		return $this->fn;
 	}
 
 	public function ln(string $s): void {

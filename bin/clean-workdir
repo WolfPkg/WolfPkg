@@ -6,7 +6,7 @@ require_once __DIR__.'/../lib/autoconf.php';
 
 $db = \Db\get_rw();
 $exts = [];
-$stm = $db->prepexec("SELECT t_thash as thash FROM package_tars UNION SELECT t_thash_dots as thash FROM package_tars");
+$stm = $db->prepexec("SELECT t_thash as thash FROM package_tars UNION SELECT t_thash_dots as thash FROM package_tars UNION SELECT b_thash as thash FROM package_bases UNION SELECT b_chash as thash FROM package_bases");
 while ($row = $stm->fetch()) {
 	$exts[$row['thash']] = true;
 }
