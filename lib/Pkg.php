@@ -175,12 +175,11 @@ function mirror_repo(array $conf) {
 
 	$stamp = date('Ymd-His');
 	$rev = [
-		'log' => $_ENV['WOLFPKG_WORKDIR']."/packages/{$fl}/{$conf['name']}/logs/repo/{$stamp}.log",
 		'rev' => '',
 		'stamp' => 0,
 		'count' => 0,
 		];
-	$log = new \Utils\Log($rev['log']);
+	$log = new \Utils\Log($_ENV['WOLFPKG_WORKDIR']."/packages/{$fl}/{$conf['name']}/logs/repo/{$stamp}.log");
 	$log->ln("URL: {$conf['url']}");
 	$log->ln('VCS: '.$conf['vcs']);
 
@@ -252,10 +251,8 @@ function mirror_repo(array $conf) {
 		$rev['count'] = intval($n_rev[0]);
 	}
 
-	$log->close();
-	$pwd = null;
-
 	if (empty($rev['rev'])) {
+		$rev['log'] = $log->fn();
 		return $rev;
 	}
 
@@ -264,21 +261,26 @@ function mirror_repo(array $conf) {
 
 	$db = \Db\get_rw();
 	$db->beginTransaction();
-	$orev = $db->prepexec("SELECT p_id, r_rev, r_stamp, r_count, r_thash FROM package_repo WHERE p_id = ? AND r_rev = ?", [$conf['id'], $rev['rev']])->fetchAll();
+	$orev = $db->prepexec("SELECT p_id, r_rev, r_stamp, r_count, r_thash FROM package_repo WHERE p_id = ?", [$conf['id']])->fetchAll();
 	if (!empty($orev)) {
 		$orev = $orev[0];
 		if ($orev['r_thash'] !== $rev['thash']) {
-			$db->prepexec("UPDATE package_repo SET r_rev = ?, r_stamp = ?, r_count = ?, r_thash = ? WHERE p_id = ? AND r_rev = ?", [$rev['rev'], $rev['stamp'], $rev['count'], $rev['thash'], $conf['id'], $rev['rev']]);
+			$db->prepexec("UPDATE package_repo SET r_rev = ?, r_stamp = ?, r_count = ?, r_thash = ? WHERE p_id = ?", [$rev['rev'], $rev['stamp'], $rev['count'], $rev['thash'], $conf['id']]);
+			$log->ln('Repo updated');
 			$rev['changed'] = true;
 		}
 	}
 	else {
 		$db->prepexec("INSERT INTO package_repo (p_id, r_rev, r_stamp, r_count, r_thash) VALUES (?, ?, ?, ?, ?)", [$conf['id'], $rev['rev'], $rev['stamp'], $rev['count'], $rev['thash']]);
+		$log->ln('Repo inserted');
 		$rev['changed'] = true;
 	}
-	$db->prepexec("DELETE FROM package_repo WHERE p_id = ? AND r_count > ?", [$conf['id'], $rev['count']]);
 	$db->commit();
 
+	$log->close();
+	$pwd = null;
+
+	$rev['log'] = $log->fn();
 	return $rev;
 }
 

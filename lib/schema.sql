@@ -24,7 +24,7 @@ CREATE TABLE package_repo (
 	r_stamp INTEGER NOT NULL,
 	r_count INTEGER NOT NULL, -- monotonically increasing revision number; for svn this == r_rev, but matters for git
 	r_thash TEXT NOT NULL, -- combined hash of p_chash and other r_* fields
-	PRIMARY KEY(p_id, r_rev),
+	PRIMARY KEY(p_id),
 	FOREIGN KEY(p_id) REFERENCES packages(p_id) ON UPDATE CASCADE ON DELETE CASCADE
 	) WITHOUT ROWID;
 
