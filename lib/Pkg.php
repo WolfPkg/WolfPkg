@@ -114,6 +114,49 @@ function get_released(array $conf): string {
 		];
 }
 
+function closest_version(array $conf, string $min, object $log = null): string {
+	$rev = null;
+	if (!$log) {
+		$log = new \Utils\Log();
+	}
+
+	$chlog = \E\file_get_contents($_ENV['WOLFPKG_ROOT']."/{$conf['path']}/debian/changelog");
+	if (preg_match('~^\Q'.$conf['name'].'\E \((?:\d+:)?\Q'.$min.'\E\+[gs]([^-)]+)~m', $chlog, $m)) {
+		$log->ln('Found matching changelog +g or +s revision');
+		$rev = $m[1];
+	}
+	else if (preg_match('~^\Q'.$conf['name'].'\E \((?:\d+:)?\Q'.$min.'\E-\d+~m', $chlog, $m)) {
+		$log->ln('Found matching changelog version');
+		$rev = "v{$min}";
+	}
+	else {
+		$pwd = new \Utils\KeepCwd();
+		$fl = substr($conf['name'], 0, 1).substr($conf['name'], -1);
+
+		$stamp = date('Y-m-d H:i:s', intval($_ENV['WOLFPKG_PK_STAMP']));
+		if ($conf['vcs'] === 'git') {
+			\E\chdir($_ENV['WOLFPKG_WORKDIR']."/packages/{$fl}/{$conf['name']}/repo.git");
+			$rev = $log->exec("git tag -l '{$min}'");
+			if ($rev === $min) {
+				$log->ln("Found matching git tag {$rev}");
+			}
+			else {
+				$default = $log->exec("git remote show origin | grep 'HEAD branch' | egrep -o '([^ ]+)\$'");
+				$rev = $log->exec("git log --first-parent '--format=format:%H' '--until={$stamp}' -n1 '{$default}'");
+				$log->ln("Latest git commit before {$stamp}: {$rev}");
+			}
+		}
+		else {
+			\E\chdir($_ENV['WOLFPKG_WORKDIR']."/packages/{$fl}/{$conf['name']}/repo.git");
+			$rev = $log->exec("svn info --show-item last-changed-revision '-r{{$stamp}}'");
+			$log->ln("Latest svn commit before {$stamp}: {$rev}");
+		}
+		$pwd = null;
+	}
+
+	return $rev;
+}
+
 function get_kinds(): array {
 	$db = \Db\get_rw();
 	$ks = [];
@@ -125,7 +168,7 @@ function get_kinds(): array {
 }
 
 function mirror_repo(array $conf) {
-	$pwd = getcwd();
+	$pwd = new \Utils\KeepCwd();
 	$fl = substr($conf['name'], 0, 1).substr($conf['name'], -1);
 	@mkdir($_ENV['WOLFPKG_WORKDIR']."/packages/{$fl}/{$conf['name']}/logs/repo", 0711, true);
 	\E\chdir($_ENV['WOLFPKG_WORKDIR']."/packages/{$fl}/{$conf['name']}");
@@ -210,7 +253,7 @@ function mirror_repo(array $conf) {
 	}
 
 	$log->close();
-	\E\chdir($pwd);
+	$pwd = null;
 
 	if (empty($rev['rev'])) {
 		return $rev;
@@ -240,7 +283,7 @@ function mirror_repo(array $conf) {
 }
 
 function make_tarball(array $conf, string $rev, string $version = 'long'): array {
-	$pwd = getcwd();
+	$pwd = new \Utils\KeepCwd();
 	$fl = substr($conf['name'], 0, 1).substr($conf['name'], -1);
 	@mkdir($_ENV['WOLFPKG_WORKDIR']."/packages/{$fl}/{$conf['name']}/logs/tars", 0711, true);
 	@mkdir($_ENV['WOLFPKG_WORKDIR']."/packages/{$fl}/{$conf['name']}/tars", 0711, true);
@@ -504,12 +547,12 @@ function make_tarball(array $conf, string $rev, string $version = 'long'): array
 	$db->commit();
 
 	$log->close();
-	\E\chdir($pwd);
+	$pwd = null;
 
 	return $tar;
 }
 
-function get_tarball(array $conf, string $rev = null, string $version = null): array {
+function get_tarball(array $conf, string $rev = '', string $version = 'long'): array {
 	$fl = substr($conf['name'], 0, 1).substr($conf['name'], -1);
 
 	$db = \Db\get_rw();
@@ -528,11 +571,34 @@ function get_tarball(array $conf, string $rev = null, string $version = null): a
 	if ($version === 'released') {
 		$rev = get_released($conf)['rev'];
 		$version = 'short';
+
+		$tar = $db->prepexec("SELECT t_thash, t_stamp FROM package_tars WHERE p_id = ? AND t_version = ?", [$conf['id'], $rev])->fetchAll();
+		if (!empty($tar[0]['t_thash']) && file_exists($_ENV['WOLFPKG_WORKDIR']."/packages/{$fl}/{$conf['name']}/tars/{$tar[0]['t_thash']}.tar.xz")) {
+			return [
+				'logs' => ['Existing tarball found'],
+				'version' => $rev,
+				'thash' => $tar[0]['t_thash'],
+				'stamp' => intval($tar[0]['t_stamp']),
+				'path' => $_ENV['WOLFPKG_WORKDIR']."/packages/{$fl}/{$conf['name']}/tars/{$tar[0]['t_thash']}.tar.xz",
+				];
+		}
 	}
 	else if ($version === 'HEAD') {
 		$rev = $repo['rev'];
 		$version = 'long';
+
+		$tar = $db->prepexec("SELECT t_version, t_thash, t_stamp FROM package_tars WHERE p_id = ? AND r_rev = ? AND t_version LIKE '%+%' AND t_version LIKE '%~%' ORDER BY t_count DESC LIMIT 1", [$conf['id'], $rev])->fetchAll();
+		if (!empty($tar[0]['t_thash']) && file_exists($_ENV['WOLFPKG_WORKDIR']."/packages/{$fl}/{$conf['name']}/tars/{$tar[0]['t_thash']}.tar.xz")) {
+			return [
+				'logs' => ['Existing tarball found'],
+				'version' => $tar[0]['t_version'],
+				'thash' => $tar[0]['t_thash'],
+				'stamp' => intval($tar[0]['t_stamp']),
+				'path' => $_ENV['WOLFPKG_WORKDIR']."/packages/{$fl}/{$conf['name']}/tars/{$tar[0]['t_thash']}.tar.xz",
+				];
+		}
 	}
+
 	$tar = make_tarball($conf, $rev, $version);
 	$tar['logs'] = [$repo['log'], $tar['log']];
 	return $tar;

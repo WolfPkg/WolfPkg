@@ -75,11 +75,27 @@ function json5_encode($data, int $opts = 0): string {
 	return $data;
 }
 
+class KeepCwd {
+	private $cwd = '';
+
+	public function __construct() {
+		$this->cwd = getcwd();
+	}
+
+	public function __destruct() {
+		$this->chdir();
+	}
+
+	public function chdir(): void {
+		\E\chdir($this->cwd);
+	}
+}
+
 class Log {
 	private $fn = null;
 	private $f = null;
 
-	public function __construct(string $fn) {
+	public function __construct(string $fn = '/dev/stdout') {
 		$this->fn = $fn;
 		$this->f = \E\fopen($fn, 'wb');
 	}

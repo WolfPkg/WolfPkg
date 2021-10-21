@@ -3,6 +3,10 @@ declare(strict_types=1);
 setlocale(LC_ALL, 'C.UTF-8');
 date_default_timezone_set('UTC');
 
+if (PHP_SAPI === 'cli' || empty($_SERVER['REMOTE_ADDR'])) {
+	proc_nice(20);
+}
+
 $env = [];
 $env['WOLFPKG_ROOT'] = dirname(__DIR__);
 $env['WOLFPKG_URL'] = 'https://'.($_SERVER['HTTP_HOST'] ?? 'pkg.pjj.cc');

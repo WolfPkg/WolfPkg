@@ -10,6 +10,7 @@ $getopt = new \GetOpt\GetOpt([
 	['h', 'help', \GetOpt\GetOpt::NO_ARGUMENT, "shows this help"],
 	['p', 'package', \GetOpt\GetOpt::REQUIRED_ARGUMENT, "package name"],
 	['v', 'version', \GetOpt\GetOpt::REQUIRED_ARGUMENT, "tarball version to use"],
+	['d', 'dep-version', \GetOpt\GetOpt::REQUIRED_ARGUMENT, "cadence of hooks: match or head; defaults to head"],
 	['b', 'bundle', \GetOpt\GetOpt::REQUIRED_ARGUMENT, "bundle dependencies: exact, released, or head"],
 	]);
 $getopt->process();
@@ -23,6 +24,11 @@ if (!empty($opts['version'])) {
 $package = '';
 if (!empty($opts['package'])) {
 	$package = $opts['package'];
+}
+
+$dep_ver = 'head';
+if (!empty($opts['dep-version'])) {
+	$dep_ver = $opts['dep-version'];
 }
 
 $bundle = '';
@@ -72,6 +78,6 @@ foreach ($pkgs as $path => $pkname) {
 	}
 
 	echo "Making Debian base for {$pkname} @ {$version}:\n";
-	$base = \Build\make_debian_base($conf, $version, $bundle);
+	$base = \Build\make_debian_base($conf, $version, $dep_ver, $bundle);
 	echo var_export($base, true), "\n";
 }

@@ -1,5 +1,25 @@
-#!/bin/bash
-set -e
-set -o pipefail
-svn export https://github.com/giellalt/giella-core/trunk/am-shared
-grep -rlF '(top_srcdir)/../giella-core/am-shared' * | xargs -rn1 perl -pe 's~[(]top_srcdir[)]/[.][.]/giella-core/am-shared~(top_srcdir)/am-shared~g;' -i
+#!/usr/bin/env php
+<?php
+declare(strict_types=1);
+require_once \getenv('WOLFPKG_ROOT').'/lib/autoconf.php';
+
+$conf = \Pkg\get('giella-core');
+
+if ($_ENV['WOLFPKG_PK_DEP_VER'] === 'head') {
+	$tar = \Pkg\get_tarball($conf, null, 'HEAD');
+}
+else {
+	$repo = \Pkg\mirror_repo($conf);
+	echo var_export($repo, true)."\n";
+	$min = substr(\Utils\exec("egrep -o '^_giella_core_min_version=[0-9.]+' m4/giella-macros.m4"), 25);
+	echo "Wants giella-core v{$min}\n";
+
+	$rev = \Pkg\closest_version($conf, $min);
+	$tar = \Pkg\get_tarball($conf, $rev);
+}
+
+echo var_export($tar, true)."\n";
+\Utils\exec("tar -Jxf '{$tar['path']}'");
+\Utils\exec("cp -af --reflink=auto 'giella-core-{$tar['version']}/am-shared' ./");
+\Utils\exec("rm -rf 'giella-core-{$tar['version']}'");
+\Utils\exec("grep -rlF '(top_srcdir)/../giella-core/am-shared' * | xargs -rn1 perl -pe 's~[(]top_srcdir[)]/[.][.]/giella-core/am-shared~(top_srcdir)/am-shared~g;' -i");

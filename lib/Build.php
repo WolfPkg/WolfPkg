@@ -2,8 +2,8 @@
 declare(strict_types=1);
 namespace Build;
 
-function make_debian_base(array $conf, string $version, string $bundle_ver = ''): array {
-	$pwd = getcwd();
+function make_debian_base(array $conf, string $version, string $dep_ver = 'head', string $bundle_ver = ''): array {
+	$pwd = new \Utils\KeepCwd();
 	$fl = substr($conf['name'], 0, 1).substr($conf['name'], -1);
 	@mkdir($_ENV['WOLFPKG_WORKDIR']."/packages/{$fl}/{$conf['name']}/logs/base", 0711, true);
 	@mkdir($_ENV['WOLFPKG_WORKDIR']."/packages/{$fl}/{$conf['name']}/tars", 0711, true);
@@ -35,12 +35,17 @@ function make_debian_base(array $conf, string $version, string $bundle_ver = '')
 	$log->exec("tar -Jxf '{$conf['name']}_{$version}.tar.xz'");
 	\E\chdir("{$conf['name']}-{$version}");
 
+	if (file_exists("{$_ENV['WOLFPKG_ROOT']}/{$conf['path']}/hooks/post-clone")) {
+		\Utils\putenv('WOLFPKG_PK_DEP_VER', $dep_ver);
+		\Utils\putenv('WOLFPKG_PK_STAMP', $tar['stamp']);
+		$log->exec("{$_ENV['WOLFPKG_ROOT']}/{$conf['path']}/hooks/post-clone");
+	}
+
 	// Bundle to avoid version drift
 	$did_bundle = false;
 	$cnfs = ['control' => '', 'copyright' => '', 'rules' => ''];
 	$rules = \E\file_get_contents("{$_ENV['WOLFPKG_ROOT']}/{$conf['path']}/debian/rules");
 	if ($bundle && file_exists('configure.ac') && !preg_match('@dh_auto_configure|dh_auto_build@', $rules)) {
-		$config = \E\file_get_contents('configure.ac');
 		$cnfs['rules'] = $rules;
 
 		$copyright = [];
@@ -57,21 +62,31 @@ function make_debian_base(array $conf, string $version, string $bundle_ver = '')
 		$withlang = '';
 
 		$deps = [];
-		$config = preg_replace('~(#|dnl )[^\n]+~s', '', $config);
-		if (preg_match_all('@AP_CHECK_LING\((.+?)\)@', $config, $ms, PREG_PATTERN_ORDER)) {
-			$deps = $ms[1];
-		}
-		if (preg_match('@(giella-core) \((.+?)\)@', $bdeps, $m)) {
-			$deps[] = "[0], [{$m[1]}], [{$m[1]}]";
-		}
-		if (preg_match('@(giella-common) \((.+?)\)@', $bdeps, $m)) {
-			$deps[] = "[0], [{$m[1]}], [{$m[1]}]";
-		}
+		$add_deps = function($config) use(&$log, &$bdeps, &$deps) {
+			$config = preg_replace('~(#|dnl )[^\n]+~s', '', \E\file_get_contents($config));
+			if (preg_match_all('@AP_CHECK_LING\((.+?)\)@', $config, $ms, PREG_PATTERN_ORDER)) {
+				foreach ($ms[1] as $dep) {
+					if (preg_match('@\[(.+?)\], \[(.+?)\](?:, \[(.+?)\])?@', $dep, $m)) {
+						$deps[$m[2]] = ['n' => intval($m[1]), 'p' => $m[2], 'v' => ($m[3] ?? '0.0.1')];
+						$log->ln("Potential bundle: {$m[2]}");
+					}
+				}
+			}
+			if (preg_match('@(giella-core) \([<>= ]*(.+?)\)@', $bdeps, $m)) {
+				$deps[$m[1]] = ['n' => 0, 'p' => $m[1], 'v' => $m[2]];
+				$log->ln("Potential bundle: {$m[1]}");
+			}
+			if (preg_match('@(giella-common) \([<>= ]*(.+?)\)@', $bdeps, $m)) {
+				$deps[$m[1]] = ['n' => 0, 'p' => $m[1], 'v' => $m[2]];
+				$log->ln("Potential bundle: {$m[1]}");
+			}
+		};
+		$add_deps('configure.ac');
 
-		foreach ($deps as $dep) {
-			$log->ln("Maybe bundle {$dep}");
-			preg_match('@\[(.+?)\], \[(.+?)\](?:, \[(.+?)\])?@', $dep, $m);
-			[$n, $p, $v] = [$m[1], $m[2], $m[3]];
+		reset($deps);
+		for ($i=0 ; $i<count($deps) ; ++$i, next($deps)) {
+			$dep = current($deps);
+			[$n, $p, $v] = [$dep['n'], $dep['p'], $dep['v']];
 
 			$b_conf = \Pkg\get($p);
 			if (!$b_conf) {
@@ -86,6 +101,8 @@ function make_debian_base(array $conf, string $version, string $bundle_ver = '')
 				$log->ln("Not bundling {$p} (says not to)");
 				continue;
 			}
+			$log->ln("Bundling {$p}");
+
 			if (empty($v)) {
 				$v = '0.0.1';
 			}
@@ -109,8 +126,9 @@ function make_debian_base(array $conf, string $version, string $bundle_ver = '')
 			else {
 				$b_tar = \Pkg\get_tarball($b_conf, null, 'HEAD');
 			}
+			$tar['stamp'] = max($tar['stamp'], $b_tar['stamp']);
 			$log->ln('Log bundle tarball: '.implode("\t", $b_tar['logs']));
-			$b_base = get_debian_base($b_conf, $b_tar['version'], $bundle_ver);
+			$b_base = get_debian_base($b_conf, $b_tar['version'], $dep_ver, $bundle_ver);
 			$log->ln("Log bundle base: {$b_base['log']}");
 
 			$log->exec("tar -Jxf '{$b_base['path_tar']}'");
@@ -132,7 +150,7 @@ function make_debian_base(array $conf, string $version, string $bundle_ver = '')
 				$ss[1] .= "\n\tcd \$(CURDIR)/{$p}-{$b_base['version']} && \$(MAKE) -j\$(NUMJOBS)";
 				if (strpos($p, 'giella-') === 0) {
 					// Delete data files that won't be used for this bundled build, but leave the infrastructure for autoreconf and configure
-					$log->exec("cd '{$p}-{$b_base['version']}/' && find devtools/ tools/analysers/ tools/tokenisers/ tools/freq_test/ tools/shellscripts/ tools/grammarcheckers/ tools/spellcheckers/ tools/hyphenators/ test/tools/grammarcheckers/ test/tools/hyphenators/ test/tools/spellcheckers/ test/tools/tokeniser/ -type f | grep -vF Makefile.am | grep -vF .in | xargs -r rm -fv");
+					$log->exec("cd '{$p}-{$b_base['version']}/' && find devtools/ tools/analysers/ tools/tokenisers/ tools/freq_test/ tools/shellscripts/ tools/grammarcheckers/ tools/spellcheckers/ tools/hyphenators/ test/tools/grammarcheckers/ test/tools/hyphenators/ test/tools/spellcheckers/ test/tools/tokeniser/ -type f 2>/dev/null | grep -vF Makefile.am | grep -vF .in | xargs -r rm -fv");
 
 					$ss[0] .= " --with-hfst --without-xfst --enable-alignment --enable-reversed-intersect --enable-apertium --with-backend-format=foma --disable-analysers --disable-generators";
 					$bdeps = preg_replace('@\s+divvun-gramcheck,?@', ' ', $bdeps);
@@ -144,7 +162,10 @@ function make_debian_base(array $conf, string $version, string $bundle_ver = '')
 			}
 
 			foreach (preg_split('~\n\n+~', \E\file_get_contents('debian/copyright')) as $f) {
-				preg_match('@^([^\n]+)\n(.+)$@s', $f, $m);
+				if (!preg_match('@^([^\n]+)\n(.+)$@s', $f, $m)) {
+					$log->ln("Copyright chunk bad: $f");
+					continue;
+				}
 				if (strpos($m[1], 'Format') === 0 || preg_match('@^Files.*debian/@', $m[1])) {
 					continue;
 				}
@@ -156,6 +177,7 @@ function make_debian_base(array $conf, string $version, string $bundle_ver = '')
 			}
 
 			$log->exec("rm -rf debian");
+			$add_deps("{$p}-{$b_base['version']}/configure.ac");
 			$did_bundle = true;
 		}
 
@@ -209,12 +231,12 @@ function make_debian_base(array $conf, string $version, string $bundle_ver = '')
 	$db->commit();
 
 	$log->close();
-	\E\chdir($pwd);
+	$pwd = null;
 
 	return $base;
 }
 
-function get_debian_base(array $conf, string $version, string $bundle_ver = ''): array {
+function get_debian_base(array $conf, string $version, string $dep_ver = 'head', string $bundle_ver = ''): array {
 	$fl = substr($conf['name'], 0, 1).substr($conf['name'], -1);
 
 	$db = \Db\get_rw();
