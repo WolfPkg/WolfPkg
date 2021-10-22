@@ -95,7 +95,7 @@ class Log {
 	private $fn = null;
 	private $f = null;
 
-	public function __construct(string $fn = '/dev/stdout') {
+	public function __construct(string $fn = 'php://stdout') {
 		$this->fn = $fn;
 		$this->f = \E\fopen($fn, 'wb');
 	}
@@ -119,7 +119,7 @@ class Log {
 		$e = 0;
 		\exec($c, $t, $e);
 		if (!$ign && $e) {
-			throw new \RuntimeException($c, $e);
+			throw new \RuntimeException("{$c} => {$e}", $e);
 		}
 		$t = trim(implode("\n", $t));
 		if ($t) {

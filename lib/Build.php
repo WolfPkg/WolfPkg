@@ -35,10 +35,14 @@ function make_debian_base(array $conf, string $version, string $dep_ver = 'head'
 	$log->exec("tar -Jxf '{$conf['name']}_{$version}.tar.xz'");
 	\E\chdir("{$conf['name']}-{$version}");
 
-	if (file_exists("{$_ENV['WOLFPKG_ROOT']}/{$conf['path']}/hooks/post-clone")) {
+	$hooks = glob("{$_ENV['WOLFPKG_ROOT']}/{$conf['path']}/_hooks/010-*");
+	if (!empty($hooks)) {
 		\Utils\putenv('WOLFPKG_PK_DEP_VER', $dep_ver);
-		\Utils\putenv('WOLFPKG_PK_STAMP', $tar['stamp']);
-		$log->exec("{$_ENV['WOLFPKG_ROOT']}/{$conf['path']}/hooks/post-clone");
+		\Utils\putenv('WOLFPKG_PK_STAMP', strval($tar['stamp']));
+		foreach ($hooks as $hook) {
+			$hook = realpath($hook);
+			$log->exec($hook);
+		}
 	}
 
 	// Bundle to avoid version drift

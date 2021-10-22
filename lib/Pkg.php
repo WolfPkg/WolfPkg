@@ -554,7 +554,7 @@ function make_tarball(array $conf, string $rev, string $version = 'long'): array
 	return $tar;
 }
 
-function get_tarball(array $conf, string $rev = '', string $version = 'long'): array {
+function get_tarball(array $conf, ?string $rev = null, string $version = 'long'): array {
 	$fl = substr($conf['name'], 0, 1).substr($conf['name'], -1);
 
 	$db = \Db\get_rw();
