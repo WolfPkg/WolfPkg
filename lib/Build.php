@@ -38,7 +38,7 @@ function make_debian_base(array $conf, string $version, string $dep_ver = 'head'
 	$hooks = glob("{$_ENV['WOLFPKG_ROOT']}/{$conf['path']}/_hooks/010-*");
 	if (!empty($hooks)) {
 		\Utils\putenv('WOLFPKG_PK_DEP_VER', $dep_ver);
-		\Utils\putenv('WOLFPKG_PK_STAMP', strval($tar['stamp']));
+		\Utils\putenv('WOLFPKG_PK_STAMP', $tar['stamp']);
 		foreach ($hooks as $hook) {
 			$hook = realpath($hook);
 			$log->exec($hook);

@@ -2,7 +2,8 @@
 declare(strict_types=1);
 namespace Utils;
 
-function putenv(string $k, string $v): void {
+function putenv(string $k, $v): void {
+	$v = strval($v);
 	\putenv("{$k}={$v}");
 	$_ENV[$k] = $v;
 }

@@ -1,0 +1,12 @@
+#!/usr/bin/env php
+<?php
+declare(strict_types=1);
+
+require_once __DIR__.'/../lib/autoconf.php';
+
+if (posix_geteuid() !== 0) {
+	echo "This must be run as root or with sudo!\n";
+	exit(1);
+}
+
+@mkdir("{$env['WOLFPKG_ROOT']}/setuid", 0710, true);

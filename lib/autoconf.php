@@ -10,6 +10,8 @@ if (PHP_SAPI === 'cli' || empty($_SERVER['REMOTE_ADDR'])) {
 $env = [];
 $env['WOLFPKG_ROOT'] = dirname(__DIR__);
 $env['WOLFPKG_URL'] = 'https://'.($_SERVER['HTTP_HOST'] ?? 'pkg.pjj.cc');
+$env['WOLFPKG_GUEST_UID'] = 1848;
+$env['WOLFPKG_GUEST_GID'] = $env['WOLFPKG_GUEST_UID'];
 require_once __DIR__.'/../config.php';
 
 require_once __DIR__.'/../vendor/autoload.php';
