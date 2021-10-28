@@ -468,7 +468,7 @@ function make_tarball(array $conf, string $rev, string $version = 'long'): array
 	}
 
 	// OS tools should only try to use OS binaries
-	$files = \Utils\split("\n", trim($log->exec_null("grep -srl '^#!/usr/bin/env'; pcregrep --buffer-size=32M -srl '^#!/(usr/local|opt/local)/bin/' *")));
+	$files = \Utils\split("\n", trim($log->exec_null("grep -srl '^#!/usr/bin/env'; pcregrep --buffer-size=32M -srl '^#!/(usr|usr/local|opt/local)/bin/' *")));
 	foreach ($files as $f) {
 		$data = file_get_contents($f);
 		if (strpos($data, '#!/usr/local/') !== false) {
@@ -488,10 +488,14 @@ function make_tarball(array $conf, string $rev, string $version = 'long'): array
 			$data = preg_replace('~^#!/usr/bin/env python~m', '#!/usr/bin/python', $data);
 		}
 		if (strpos($data, '#!/usr/bin/env bash') !== false) {
-			$log->ln("Fixing Bash shebang in '{$f}'");
-			$data = preg_replace('~^#!/usr/bin/env bash~m', '#!/usr/bin/bash', $data);
+			$log->ln("Fixing env Bash shebang in '{$f}'");
+			$data = preg_replace('~^#!/usr/bin/env bash~m', '#!/bin/bash', $data);
 		}
-		file_put_contents($f, $data);
+		if (strpos($data, '#!/usr/bin/bash') !== false) {
+			$log->ln("Fixing usr Bash shebang in '{$f}'");
+			$data = preg_replace('~^#!/usr/bin/bash~m', '#!/bin/bash', $data);
+		}
+		\E\file_put_contents($f, $data);
 	}
 
 	// Replace @APERTIUM_AUTO_VERSION@ with git/svn revision
@@ -499,7 +503,7 @@ function make_tarball(array $conf, string $rev, string $version = 'long'): array
 	foreach ($files as $f) {
 		$data = file_get_contents($f);
 		$data = str_replace('@APERTIUM_AUTO_VERSION@', $tar['rev'], $data);
-		file_put_contents($f, $data);
+		\E\file_put_contents($f, $data);
 	}
 
 	if ($version === 'long') {

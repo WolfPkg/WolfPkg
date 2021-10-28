@@ -5,3 +5,4 @@
 Needs:
 * pcregrep
 * xz
+* Docker, with experimental --squash flag enabled

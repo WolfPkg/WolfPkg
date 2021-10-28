@@ -8,6 +8,26 @@ function putenv(string $k, $v): void {
 	$_ENV[$k] = $v;
 }
 
+function configure_file($fn, $fo): void {
+	$mod = \E\fileperms($fn) & 0777;
+	$d = \E\file_get_contents($fn);
+	foreach ($_ENV as $k => $v) {
+		$d = str_replace("{PKG:{$k}}", $v, $d);
+	}
+	\E\file_put_contents($fo, $d);
+	\E\chmod($fn, $mod);
+}
+
+function configure_file_tmp($fn): string {
+	$fo = \tempnam(\sys_get_temp_dir(), 'wolfpkg');
+	configure_file($fn, $fo);
+	return $fo;
+}
+
+function configure_file_in($fn): void {
+	configure_file($fn.'.in', $fn);
+}
+
 function b64x(string $str): string {
 	$str = \base64_encode($str);
 	$str = trim($str, '=');
@@ -166,6 +186,16 @@ function exec(string $c, bool $ign = false): string {
 
 function exec_null(string $c): string {
 	return exec($c, true);
+}
+
+function ppassthru(string $c): void {
+	if (strpos($c, '2>') === false && strpos($c, '&>') === false) {
+		$c .= ' 2>&1';
+	}
+	echo "Command: {$c}\n";
+	$p = \E\popen($c, 'rb');
+	fpassthru($p);
+	pclose($p);
 }
 
 function split(string $delim, string $str): array {

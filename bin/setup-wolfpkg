@@ -9,4 +9,11 @@ if (posix_geteuid() !== 0) {
 	exit(1);
 }
 
-@mkdir("{$env['WOLFPKG_ROOT']}/setuid", 0710, true);
+@mkdir("{$_ENV['WOLFPKG_ROOT']}/setuid", 0710, true);
+\E\chgrp("{$_ENV['WOLFPKG_ROOT']}/setuid", $_ENV['WOLFPKG_HOST_GROUP']);
+
+\E\chdir($_ENV['WOLFPKG_ROOT'].'/docker');
+$df = \Utils\configure_file_tmp('Dockerfile.ubuntu-tools');
+\Utils\ppassthru('cat '.escapeshellarg($df).' | docker build --squash -t wolfpkg/ubuntu-tools -');
+$df = \Utils\configure_file_tmp('Dockerfile.debian-tools');
+\Utils\ppassthru('cat '.escapeshellarg($df).' | docker build --squash -t wolfpkg/debian-tools -');

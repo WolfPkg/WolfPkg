@@ -218,7 +218,7 @@ function make_debian_base(array $conf, string $version, string $dep_ver = 'head'
 	foreach ($cnfs as $k => $v) {
 		if (!empty($v)) {
 			$log->ln("Overwriting debian/{$k}");
-			file_put_contents("debian/{$k}", $v);
+			\E\file_put_contents("debian/{$k}", $v);
 		}
 	}
 
