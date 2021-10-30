@@ -12,7 +12,7 @@ function configure_file($fn, $fo): void {
 	$mod = \E\fileperms($fn) & 0777;
 	$d = \E\file_get_contents($fn);
 	foreach ($_ENV as $k => $v) {
-		$d = str_replace("{PKG:{$k}}", $v, $d);
+		$d = str_replace("{ENV:{$k}}", $v, $d);
 	}
 	\E\file_put_contents($fo, $d);
 	\E\chmod($fn, $mod);

@@ -1,0 +1,7 @@
+{
+	includes: ['.*'],
+	tarballs: 'released',
+	versions: 'short',
+	dep_versions: 'match',
+	bundle: 'exact',
+}

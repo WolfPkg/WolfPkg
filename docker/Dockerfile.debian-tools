@@ -7,14 +7,13 @@ ENV LANG=C.UTF-8 \
 
 RUN export HOST_IP=$(cat /proc/net/route | mawk '/^[a-z]+[0-9]+\t00000000/ { printf("%d.%d.%d.%d\n", "0x" substr($3, 7, 2), "0x" substr($3, 5, 2), "0x" substr($3, 3, 2), "0x" substr($3, 1, 2)) }') && echo 'Acquire::http::Proxy "http://'$HOST_IP':3124";' > /etc/apt/apt.conf.d/30autoproxy
 
-# Upgrade everything and install base builder dependencies
 RUN apt-get -qy update && apt-get -qfy --no-install-recommends install apt-utils
 RUN apt-get -qy update && apt-get -qfy --no-install-recommends dist-upgrade
 RUN apt-get -qy update && apt-get -qfy --no-install-recommends install devscripts python3-debian lintian reprepro xz-utils
 RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 RUN mkdir /wolfpkg
-RUN groupadd -g {PKG:WOLFPKG_HOST_GID} {PKG:WOLFPKG_HOST_GROUP} && useradd -d /wolfpkg -M -u {PKG:WOLFPKG_HOST_UID} -g {PKG:WOLFPKG_HOST_GID} {PKG:WOLFPKG_HOST_USER}
-RUN chown {PKG:WOLFPKG_HOST_UID}:{PKG:WOLFPKG_HOST_GID} /wolfpkg
+RUN groupadd -g {ENV:WOLFPKG_HOST_GID} {ENV:WOLFPKG_HOST_GROUP} && useradd -d /wolfpkg -M -u {ENV:WOLFPKG_HOST_UID} -g {ENV:WOLFPKG_HOST_GID} {ENV:WOLFPKG_HOST_USER}
+RUN chown {ENV:WOLFPKG_HOST_UID}:{ENV:WOLFPKG_HOST_GID} /wolfpkg
 
-USER {PKG:WOLFPKG_HOST_UID}:{PKG:WOLFPKG_HOST_GID}
+USER {ENV:WOLFPKG_HOST_UID}:{ENV:WOLFPKG_HOST_GID}

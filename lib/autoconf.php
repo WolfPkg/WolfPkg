@@ -9,6 +9,7 @@ if (PHP_SAPI === 'cli' || empty($_SERVER['REMOTE_ADDR'])) {
 
 $env = [];
 $env['WOLFPKG_ROOT'] = dirname(__DIR__);
+$env['WOLFPKG_WORKDIR'] = realpath($env['WOLFPKG_ROOT'].'/../data');
 $env['WOLFPKG_URL'] = 'https://'.($_SERVER['HTTP_HOST'] ?? 'pkg.pjj.cc');
 $env['WOLFPKG_HOST_USER'] = 'wolfpkg';
 $env['WOLFPKG_HOST_GROUP'] = $env['WOLFPKG_HOST_USER'];
@@ -29,6 +30,7 @@ clearstatcache();
 $_ENV = \getenv();
 \Utils\putenv('TZ', 'UTC');
 \Utils\putenv('LC_ALL', 'C.UTF-8');
+// GNUPGHOME
 
 foreach ($env as $k => $v) {
 	if (!\array_key_exists($k, $_ENV)) {

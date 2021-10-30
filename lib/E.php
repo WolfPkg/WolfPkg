@@ -16,7 +16,13 @@ function chmod(string $f, int $t): void {
 
 function chgrp(string $f, $t): void {
 	if (\chgrp($f, $t) === false) {
-		throw new \RuntimeException("chmod('{$f}', {$t})");
+		throw new \RuntimeException("chgrp('{$f}', {$t})");
+	}
+}
+
+function chown(string $f, $t): void {
+	if (\chown($f, $t) === false) {
+		throw new \RuntimeException("chown('{$f}', {$t})");
 	}
 }
 

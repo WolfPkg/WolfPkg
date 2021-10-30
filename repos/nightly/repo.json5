@@ -1,0 +1,7 @@
+{
+	includes: ['.*'],
+	tarballs: 'head',
+	versions: 'long',
+	dep_versions: 'head',
+	bundle: false,
+}
