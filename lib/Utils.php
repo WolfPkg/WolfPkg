@@ -8,19 +8,27 @@ function putenv(string $k, $v): void {
 	$_ENV[$k] = $v;
 }
 
-function configure_file($fn, $fo): void {
-	$mod = \E\fileperms($fn) & 0777;
-	$d = \E\file_get_contents($fn);
+function configure_string($d): string {
 	foreach ($_ENV as $k => $v) {
 		$d = str_replace("{ENV:{$k}}", $v, $d);
 	}
+	return $d;
+}
+
+function configure_file($fn, $fo): string {
+	$mod = \E\fileperms($fn) & 0777;
+	$d = \E\file_get_contents($fn);
+	$d = configure_string($d);
 	\E\file_put_contents($fo, $d);
 	\E\chmod($fn, $mod);
+	return $fo;
 }
 
 function configure_file_tmp($fn): string {
-	$fo = \tempnam(\sys_get_temp_dir(), 'wolfpkg');
-	configure_file($fn, $fo);
+	$d = \E\file_get_contents($fn);
+	$d = configure_string($d);
+	$fo = \sys_get_temp_dir().'/'.sha256_b64x($d);
+	\E\file_put_contents($fo, $d);
 	return $fo;
 }
 

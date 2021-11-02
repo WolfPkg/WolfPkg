@@ -81,8 +81,40 @@ CREATE TABLE targets (
 	tg_archs TEXT NOT NULL DEFAULT 'amd64,arm64',
 	tg_extra TEXT NOT NULL DEFAULT '',
 	PRIMARY KEY(tg_id AUTOINCREMENT),
-	FOREIGN KEY(k_id) REFERENCES kinds(k_id) ON UPDATE CASCADE ON DELETE CASCADE
+	FOREIGN KEY(k_id) REFERENCES kinds(k_id) ON UPDATE CASCADE ON DELETE CASCADE,
 	UNIQUE(tg_distro, tg_version)
+	);
+
+-- Published packages per target
+CREATE TABLE target_packages (
+	tg_id INTEGER NOT NULL,
+	tg_arch TEXT NOT NULL,
+	p_id INTEGER NOT NULL,
+	t_version TEXT NOT NULL,
+	tp_repo TEXT NOT NULL, -- nightly, release
+	tp_distv INTEGER NOT NULL DEFAULT 1,
+	tp_binaries TEXT NOT NULL,
+	PRIMARY KEY(tg_id, tg_arch, p_id, t_version),
+	FOREIGN KEY(tg_id) REFERENCES targets(tg_id) ON UPDATE CASCADE ON DELETE CASCADE,
+	FOREIGN KEY(p_id) REFERENCES packages(p_id) ON UPDATE CASCADE ON DELETE CASCADE
+	) WITHOUT ROWID;
+
+-- Builds
+CREATE TABLE builds (
+	b_id INTEGER NOT NULL,
+	b_task TEXT NOT NULL,
+	b_wait_for INTEGER,
+	b_priority INTEGER NOT NULL DEFAULT 127,
+	b_created INTEGER NOT NULL DEFAULT (strftime('%s', 'now')),
+	b_status TEXT NOT NULL DEFAULT 'ready', -- waiting, ready, started, success, fail
+	p_id INTEGER,
+	tg_id INTEGER,
+	tg_arch TEXT,
+	b_builder TEXT,
+	b_started INTEGER,
+	b_stopped INTEGER,
+	b_log TEXT,
+	PRIMARY KEY(b_id AUTOINCREMENT)
 	);
 
 BEGIN;
@@ -105,6 +137,7 @@ INSERT INTO targets (k_id, tg_distro, tg_version, tg_extra) VALUES (1, 'ubuntu',
 INSERT INTO targets (k_id, tg_distro, tg_version, tg_extra) VALUES (1, 'ubuntu', 'focal', '{dh:12}');
 INSERT INTO targets (k_id, tg_distro, tg_version, tg_extra) VALUES (1, 'ubuntu', 'hirsute', '{dh:13}');
 INSERT INTO targets (k_id, tg_distro, tg_version, tg_extra) VALUES (1, 'ubuntu', 'impish', '{dh:13}');
+INSERT INTO targets (k_id, tg_distro, tg_version, tg_extra) VALUES (1, 'ubuntu', 'jammy', '{dh:13}');
 INSERT INTO targets (k_id, tg_distro, tg_version) VALUES (2, 'centos', '7');
 INSERT INTO targets (k_id, tg_distro, tg_version) VALUES (2, 'centos', '8');
 INSERT INTO targets (k_id, tg_distro, tg_version) VALUES (2, 'rocky', '8');

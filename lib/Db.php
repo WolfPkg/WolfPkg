@@ -31,26 +31,6 @@ function get(bool $read_only = false): object {
 	if (!$existed) {
 		printf("Creating SQLite database %s\n", $db_file);
 		$db->exec(\E\file_get_contents($_ENV['WOLFPKG_ROOT'].'/lib/schema.sql'));
-		/*
-		$db->exec("CREATE TABLE package_targets (
-			p_id INTEGER NOT NULL,
-			t_id INTEGER NOT NULL, -- maybe not integer
-			s_thash TEXT NOT NULL,
-			PRIMARY KEY(p_id, t_id, s_thash),
-			FOREIGN KEY(p_id) REFERENCES packages(p_id) ON UPDATE CASCADE ON DELETE CASCADE,
-			FOREIGN KEY(s_thash) REFERENCES sources(s_thash) ON UPDATE CASCADE ON DELETE RESTRICT
-			) WITHOUT ROWID");
-		$db->exec("CREATE TABLE published (
-			p_id INTEGER NOT NULL,
-			k_kind INTEGER NOT NULL,
-			s_thash TEXT NOT NULL,
-			s_version TEXT NOT NULL,
-			b_binaries TEXT NOT NULL,
-			PRIMARY KEY(p_id, k_kind, s_thash),
-			FOREIGN KEY(p_id) REFERENCES packages(p_id) ON UPDATE CASCADE ON DELETE CASCADE,
-			FOREIGN KEY(s_thash) REFERENCES sources(s_thash) ON UPDATE CASCADE ON DELETE RESTRICT
-			) WITHOUT ROWID");
-		//*/
 		chmod($db_file, 0664);
 	}
 

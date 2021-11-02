@@ -221,6 +221,7 @@ function make_debian_base(array $conf, string $version, string $dep_ver = 'head'
 			\E\file_put_contents("debian/{$k}", $v);
 		}
 	}
+	$log->exec('wrap-and-sort -v');
 
 	$log->exec("find debian -not -type d | LC_ALL=C sort > orig.lst");
 	$log->exec("tar -I 'xz -T0 -4' --owner=0 --group=0 --no-acls --no-selinux --no-xattrs '--mtime={$mtime}' -cf debian.tar.xz -T orig.lst");

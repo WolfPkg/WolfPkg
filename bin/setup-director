@@ -11,4 +11,4 @@ if (posix_geteuid() !== 0) {
 
 \E\chdir($_ENV['WOLFPKG_ROOT']);
 $df = \Utils\configure_file_tmp('docker/Dockerfile.wolfpkg');
-\Utils\ppassthru('cat '.escapeshellarg($df).' | docker build --pull --squash -t wolfpkg/wolfpkg -');
+\Utils\ppassthru('docker build --pull --squash -t wolfpkg/wolfpkg -f '.escapeshellarg($df).' .');
