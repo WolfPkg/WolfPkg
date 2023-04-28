@@ -1,8 +1,78 @@
+apertium (3.8.3-1) unstable; urgency=medium
+
+  * Update to latest upstream
+
+ -- Tino Didriksen <tino@didriksen.cc>  Tue, 01 Nov 2022 09:38:15 +0100
+
+apertium (3.8.2-2) unstable; urgency=medium
+
+  * Upload to unstable.
+
+ -- Kartik Mistry <kartik@debian.org>  Wed, 27 Jul 2022 10:45:36 +0530
+
+apertium (3.8.2-1) experimental; urgency=low
+
+  * Update to latest upstream:
+    + Updated package names for soname untangling.
+  * Fixes FTBFS with GCC 12 (Closes: #1012894)
+
+ -- Tino Didriksen <tino@didriksen.cc>  Sun, 24 Jul 2022 13:26:47 +0200
+
+apertium (3.8.1-2) unstable; urgency=low
+
+  * Upload to unstable.
+
+ -- Kartik Mistry <kartik@debian.org>  Fri, 18 Mar 2022 18:03:11 +0530
+
+apertium (3.8.1-1) experimental; urgency=low
+
+  [ Tino Didriksen ]
+  * Update to latest upstream:
+    + Updated package names for soname bump.
+  * Switched from PCRE to ICU (Closes: #1000111)
+
+  [ Kartik Mistry ]
+  * debian/control:
+    + Removed deprecated XB-Python-Version field.
+  * debian/copyright:
+    + Updated Debian copyright year.
+    + Removed unused BSL-1.0 license block.
+
+ -- Kartik Mistry <kartik@debian.org>  Tue, 15 Mar 2022 08:51:57 +0530
+
+apertium (3.7.2-2) unstable; urgency=medium
+
+  [ Tino Didriksen ]
+  * Added missing Depends on gawk (Closes: #999456)
+
+ -- Kartik Mistry <kartik@debian.org>  Thu, 11 Nov 2021 17:13:11 +0530
+
+apertium (3.7.2-1) unstable; urgency=low
+
+  [ Tino Didriksen ]
+  * Update to latest upstream non-ICU release
+  * Apply patch from steve.langasek@ubuntu.com (Closes: #995317)
+
+  [ Kartik Mistry ]
+  * debian/control:
+    + Updated Standards-Version to 4.6.0
+
+ -- Kartik Mistry <kartik@debian.org>  Fri, 29 Oct 2021 17:23:51 +0530
+
+apertium (3.7.1-2) unstable; urgency=low
+
+  [ Debian Janitor ]
+  * Drop unnecessary dependency on dh-autoreconf.
+  * Fix day-of-week for changelog entry 3.0.7+1-2~lenny2.
+
+ -- Kartik Mistry <kartik@debian.org>  Tue, 31 Aug 2021 19:58:15 +0530
+
 apertium (3.7.1-1) unstable; urgency=low
 
+  [ Tino Didriksen ]
   * Append the endianness to the PCRE version (Closes: #977753)
 
- -- Tino Didriksen <mail@tinodidriksen.com>  Mon, 21 Dec 2020 10:01:01 +0100
+ -- Kartik Mistry <kartik@debian.org>  Tue, 22 Dec 2020 09:42:17 +0530
 
 apertium (3.7.0-1) unstable; urgency=low
 
@@ -273,7 +343,7 @@ apertium (3.0.7+1-2~lenny2) testing-proposed-updates; urgency=low
   * Fix PCRE dependency nightmare. (Closes: #503861)
   * Fix mktemp security symlink thing. (Closes: #496395)
 
- -- Francis Tyers <ftyers@prompsit.com>  Wed, 3 Nov 2008 22:47:00 +0000
+ -- Francis Tyers <ftyers@prompsit.com>  Mon, 03 Nov 2008 22:47:00 +0000
 
 apertium (3.0.7+1-2) unstable; urgency=medium
 

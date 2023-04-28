@@ -1,5 +1,6 @@
-apertium-regtest (0.0.1-1) unstable; urgency=low
+apertium-regtest (0.9.1-1) experimental; urgency=low
 
-  * Initial release
+  [ Tino Didriksen ]
+  * Initial release (Closes: #1007227)
 
- -- Tino Didriksen <tino@didriksen.cc>  Mon, 24 Aug 2020 13:27:24 +0200
+ -- Kartik Mistry <kartik@debian.org>  Mon, 14 Mar 2022 10:02:53 +0530

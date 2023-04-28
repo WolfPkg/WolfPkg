@@ -31,11 +31,11 @@ BuildRequires: utf8cpp-devel
 %endif
 BuildRequires: zip
 %if 0%{?el7}
-BuildRequires: devtoolset-7-gcc-c++
+BuildRequires: devtoolset-11-gcc-c++
 %endif
 
 Requires: gawk
-Requires: libapertium3-3_8-1 = %{version}-%{release}
+Requires: libapertium3 = %{version}-%{release}
 Requires: lttoolbox >= 3.6.0
 # Require xmllint from:
 Requires: libxml2
@@ -60,14 +60,13 @@ It will be possible to use Apertium to build machine translation
 systems for a variety of related-language pairs simply providing
 the linguistic data needed in the right format.
 
-%package -n libapertium3-3_8-1
+%package -n libapertium3
 Summary: Shared library for apertium
 Group: Development/Libraries
 Provides: libapertium = %{version}-%{release}
 Obsoletes: libapertium < %{version}-%{release}
-Obsoletes: libapertium3 < %{version}-%{release}
 
-%description -n libapertium3-3_8-1
+%description -n libapertium3
 Contains shared library for the Apertium shallow-transfer
 machine translation engine.
 
@@ -84,7 +83,7 @@ machine translation engine.
 
 %package -n python3-apertium-core
 Summary: Python 3 module for the Apertium shallow-transfer machine translation engine
-Requires: libapertium3-3_8-1 = %{version}-%{release}
+Requires: libapertium3 = %{version}-%{release}
 
 %description -n python3-apertium-core
 Python 3 module for the Apertium shallow-transfer machine translation engine
@@ -94,7 +93,7 @@ Python 3 module for the Apertium shallow-transfer machine translation engine
 
 %build
 %if 0%{?el7}
-source /opt/rh/devtoolset-7/enable
+source /opt/rh/devtoolset-11/enable
 %endif
 export LC_ALL=%(locale -a | grep -i utf | head -n1)
 autoreconf -fi
@@ -103,16 +102,15 @@ make %{?_smp_mflags}
 
 %install
 %if 0%{?el7}
-source /opt/rh/devtoolset-7/enable
+source /opt/rh/devtoolset-11/enable
 %endif
 make DESTDIR=%{buildroot} install
 rm -f %{buildroot}/%{_libdir}/*.la
 rm -f %{buildroot}/%{_datadir}/man/man1/*lextor*
-ln -s libapertium3-3.8.so.1.0.0 %{buildroot}/%{_libdir}/libapertium3-3.8.so
 
 %check
 %if 0%{?el7}
-source /opt/rh/devtoolset-7/enable
+source /opt/rh/devtoolset-11/enable
 %endif
 export LC_ALL=%(locale -a | grep -i utf | head -n1)
 make check
@@ -157,19 +155,15 @@ make check
 %{_datadir}/man/man1/apertium-unformat.*
 %{_datadir}/man/man1/apertium-utils-fixlatex.*
 
-%files -n libapertium3-3_8-1
+%files -n libapertium3
 %defattr(-,root,root)
 %{_libdir}/*.so.*
 
 %files -n apertium-devel
 %defattr(-,root,root)
 %{_bindir}/apertium-editdist
-%{_bindir}/apertium-filter-ambiguity
-%{_bindir}/apertium-filter-dix
-%{_bindir}/apertium-filter-rules
-%{_bindir}/apertium-gen-deformat
-%{_bindir}/apertium-gen-modes
-%{_bindir}/apertium-gen-reformat
+%{_bindir}/apertium-filter-*
+%{_bindir}/apertium-gen-*
 %{_bindir}/apertium-genvdix
 %{_bindir}/apertium-genvldix
 %{_bindir}/apertium-genvrdix
@@ -179,18 +173,12 @@ make check
 %{_bindir}/apertium-tagger-apply-new-rules
 %{_bindir}/apertium-tagger-readwords
 %{_bindir}/apertium-translate-to-default-equivalent
-%{_bindir}/apertium-validate-acx
-%{_bindir}/apertium-validate-dictionary
-%{_bindir}/apertium-validate-interchunk
-%{_bindir}/apertium-validate-modes
-%{_bindir}/apertium-validate-postchunk
-%{_bindir}/apertium-validate-tagger
-%{_bindir}/apertium-validate-transfer
+%{_bindir}/apertium-validate-*
 %{_includedir}/*
 %{_libdir}/pkgconfig/*
 %{_libdir}/*.so
 %{_datadir}/aclocal/*
-%{_datadir}/man/man1/apertium-filter-ambiguity.*
+%{_datadir}/man/man1/apertium-filter-*
 %{_datadir}/man/man1/apertium-gen-*
 %{_datadir}/man/man1/apertium-tagger-apply-new-rules.*
 %{_datadir}/man/man1/apertium-validate-*
@@ -199,9 +187,9 @@ make check
 %defattr(-,root,root)
 %{python3_sitearch}/*
 
-%post -n libapertium3-3_8-1 -p /sbin/ldconfig
+%post -n libapertium3 -p /sbin/ldconfig
 
-%postun -n libapertium3-3_8-1 -p /sbin/ldconfig
+%postun -n libapertium3 -p /sbin/ldconfig
 
 %changelog
 * Fri Sep 05 2014 Tino Didriksen <tino@didriksen.cc> 3.3.0

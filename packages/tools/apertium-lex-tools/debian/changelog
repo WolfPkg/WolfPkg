@@ -1,3 +1,58 @@
+apertium-lex-tools (0.4.2-2) unstable; urgency=medium
+
+  * Add Breaks+Replaces (Closes: 1034929)
+
+ -- Tino Didriksen <tino@didriksen.cc>  Thu, 27 Apr 2023 15:38:15 +0200
+
+apertium-lex-tools (0.4.2-1) unstable; urgency=medium
+
+  * Update to latest upstream
+
+ -- Tino Didriksen <tino@didriksen.cc>  Wed, 26 Oct 2022 13:41:14 +0200
+
+apertium-lex-tools (0.4.1-2) unstable; urgency=low
+
+  * Upload to unstable
+
+ -- Tino Didriksen <tino@didriksen.cc>  Thu, 01 Sep 2022 10:18:07 +0200
+
+apertium-lex-tools (0.4.1-1) experimental; urgency=low
+
+  * Update to latest upstream
+  * debian/control:
+    + Decouple SO-version, and bump it
+
+ -- Tino Didriksen <tino@didriksen.cc>  Mon, 29 Aug 2022 15:25:11 +0200
+
+apertium-lex-tools (0.3.1-2) unstable; urgency=low
+
+  * Upload to unstable.
+
+ -- Kartik Mistry <kartik@debian.org>  Wed, 23 Mar 2022 11:04:08 +0530
+
+apertium-lex-tools (0.3.1-1) experimental; urgency=low
+
+  [ Tino Didriksen ]
+  * Update to latest upstream:
+    + Provides new binary: libapertium-lex-tools0-0.3-0
+    + Fixes Python autopkgtest failure.
+  * debian/control:
+    + Upstream now makes a library,
+      so update package with consequences thereof.
+
+ -- Kartik Mistry <kartik@debian.org>  Mon, 21 Mar 2022 21:39:25 +0530
+
+apertium-lex-tools (0.3.0-1) unstable; urgency=low
+
+  [ Tino Didriksen ]
+  * Update to latest upstream release. (Closes: #1007985)
+  * debian/control:
+    + Updated Build-deps.
+    + Updated Standards-Version to 4.6.0
+  * Updated debian/watch file.
+
+ -- Kartik Mistry <kartik@debian.org>  Sun, 20 Mar 2022 16:39:19 +0530
+
 apertium-lex-tools (0.2.7-1) unstable; urgency=low
 
   * Force raw I/O to little-endian,

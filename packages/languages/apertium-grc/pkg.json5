@@ -1,0 +1,8 @@
+{
+	excludes: [
+		'*/',
+		'+ corpus/grc.tagged',
+		'+ speller/.*',
+		'+ test/.*',
+		],
+}

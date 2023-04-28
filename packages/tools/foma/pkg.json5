@@ -1,7 +1,7 @@
 {
 	url: 'mhulden/foma',
 	chroot: 'foma',
-	version_in: 'Makefile',
+	version_in: 'fomalib.h',
 	excludes: [
 		'*/',
 		],

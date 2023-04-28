@@ -1,10 +1,102 @@
+lttoolbox (3.7.1-1) unstable; urgency=medium
+
+  * Update to latest upstream
+
+ -- Tino Didriksen <tino@didriksen.cc>  Tue, 01 Nov 2022 09:38:15 +0100
+
+lttoolbox (3.7.0-1) experimental; urgency=medium
+
+  * Update to latest upstream:
+    + Updated package names for soname untangling.
+    + Binary lsx-comp moved from package apertium-separable
+  * debian/
+    + docs: Removed AUTHORS in favour of installing it via rules -A
+    + copyright: python/* is GPLv3+
+
+ -- Tino Didriksen <tino@didriksen.cc>  Wed, 26 Oct 2022 13:41:14 +0200
+
+lttoolbox (3.6.6-1) unstable; urgency=medium
+
+  [ Tino Didriksen ]
+  * New upstream release:
+    + Fixes data compilation bug.
+
+ -- Kartik Mistry <kartik@debian.org>  Mon, 06 Jun 2022 16:44:19 +0530
+
+lttoolbox (3.6.4-1) unstable; urgency=high
+
+  [ Tino Didriksen ]
+  * New upstream release
+   + Includes fix for missing ICU linkage (Closes: #1010094)
+
+ -- Kartik Mistry <kartik@debian.org>  Tue, 26 Apr 2022 20:05:34 +0530
+
+lttoolbox (3.6.1-2) unstable; urgency=medium
+
+  * Upload to unstable.
+
+ -- Kartik Mistry <kartik@debian.org>  Mon, 21 Mar 2022 19:17:17 +0530
+
+lttoolbox (3.6.1-1) experimental; urgency=low
+
+  [ Tino Didriksen ]
+  * Update to latest upstream:
+    + Fixes Python autopkgtest failure
+  * Fixed debian/watch.
+
+ -- Kartik Mistry <kartik@debian.org>  Mon, 21 Mar 2022 17:01:13 +0530
+
+lttoolbox (3.6.0-2) unstable; urgency=low
+
+  * Source only upload.
+
+ -- Kartik Mistry <kartik@debian.org>  Tue, 15 Mar 2022 21:55:01 +0530
+
+lttoolbox (3.6.0-1) unstable; urgency=low
+
+  [ Tino Didriksen ]
+  * Update to latest upstream:
+    + Updated package names for soname bump.
+
+  [ Kartik Mistry ]
+  * debian/copyright:
+    + Updated Debian copyright year.
+    + Removed BSL-1.0 license. Files are no longer used.
+  * debian/control:
+    + Removed XB-Python-Version.
+  * Removed unused Lintian overrides.
+
+ -- Kartik Mistry <kartik@debian.org>  Mon, 14 Mar 2022 17:42:48 +0530
+
+lttoolbox (3.5.4-1) unstable; urgency=low
+
+  [ Tino Didriksen ]
+  * Update to latest upstream non-ICU release
+  * Fixed debian/watch to what I actually meant
+
+  [ Kartik Mistry ]
+  * debian/control:
+    + Updated Standards-Version to 4.6.0
+
+ -- Kartik Mistry <kartik@debian.org>  Fri, 29 Oct 2021 10:41:38 +0530
+
+lttoolbox (3.5.3-2) unstable; urgency=low
+
+  * Fixed debian/watch.
+
+ -- Kartik Mistry <kartik@debian.org>  Mon, 25 Jan 2021 21:27:52 +0530
+
 lttoolbox (3.5.3-1) unstable; urgency=low
 
+  [ Tino Didriksen ]
   * Update to latest upstream
   * debian/control:
     + Updated Standards-Version to 4.5.1
 
- -- Tino Didriksen <tino@didriksen.cc>  Thu, 26 Nov 2020 11:13:13 +0100
+  [ Kartik Mistry ]
+  * Removed unused lintian override.
+
+ -- Kartik Mistry <kartik@debian.org>  Wed, 16 Dec 2020 13:41:27 +0530
 
 lttoolbox (3.5.1-2) unstable; urgency=low
 
