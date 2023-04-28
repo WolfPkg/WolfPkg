@@ -28,6 +28,7 @@ require_once __DIR__.'/Build.php';
 
 clearstatcache();
 $_ENV = \getenv();
+\Utils\putenv('GIT_TERMINAL_PROMPT', '0');
 \Utils\putenv('TZ', 'UTC');
 \Utils\putenv('LC_ALL', 'C.UTF-8');
 // GNUPGHOME
