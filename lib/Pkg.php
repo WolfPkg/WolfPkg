@@ -363,8 +363,16 @@ function make_tarball(array $conf, string $rev, string $version = 'long'): array
 			$log->ln('Found _VERSION_MAJOR/MINOR/PATCH version');
 			$ver_in = "{$m[1]}.{$m[2]}.{$m[3]}";
 		}
+		else if (preg_match('@MAJOR_VERSION (\d+).*?MINOR_VERSION (\d+).*?BUILD_VERSION (\d+)@s', $data, $m)) {
+			$log->ln('Found MAJOR_/MINOR_/BUILD_VERSION version');
+			$ver_in = "{$m[1]}.{$m[2]}.{$m[3]}";
+		}
 		else if (preg_match('@__version__ = "([\d.]+)"@s', $data, $m) || preg_match('@__version__ = \'([\d.]+)\'@s', $data, $m)) {
 			$log->ln('Found __version__ version');
+			$ver_in = $m[1];
+		}
+		else if (preg_match('@AC_INIT.*?\[open-([\d.]+)[^\]]*\]@s', $data, $m)) {
+			$log->ln('Found Manatee AC_INIT version');
 			$ver_in = $m[1];
 		}
 		else if (preg_match('@AC_INIT.*?\[([\d.]+)[^\]]*\]@s', $data, $m)) {
