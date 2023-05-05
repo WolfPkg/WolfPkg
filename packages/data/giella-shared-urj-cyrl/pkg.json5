@@ -1,3 +1,4 @@
 {
 	url: 'giellalt/shared-urj-cyrl',
+	bundle_self: true,
 }

@@ -1,3 +1,4 @@
 {
 	url: 'giellalt/shared-smi',
+	bundle_self: true,
 }

@@ -1,3 +1,4 @@
 {
 	url: 'giellalt/shared-mul',
+	bundle_self: true,
 }

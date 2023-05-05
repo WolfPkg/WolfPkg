@@ -1,3 +1,4 @@
 {
 	url: 'giellalt/shared-eng',
+	bundle_self: true,
 }
