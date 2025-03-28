@@ -16,13 +16,18 @@ foreach ($tars as $t) {
 	$b = basename($t, '.tar.xz');
 	if (!array_key_exists($b, $exts)) {
 		echo "Removing {$t}\n";
-		unlink($t);
+		echo \Utils\exec_null("rm -rfv '{$b}' '{$t}'");
 	}
 }
 
 $logs = \Utils\exec_null("find '{$_ENV['WOLFPKG_WORKDIR']}' -wholename '*/logs/*.log' -mtime +180 -print0 | LC_ALL=C sort -zr | xargs -0r rm -fv 2>/dev/null");
 if ($logs) {
 	echo $logs."\n";
+}
+
+$tmps = \Utils\exec_null("find '{$_ENV['WOLFPKG_WORKDIR']}/tmp' -not -type d -mtime +180 -print0 | LC_ALL=C sort -zr | xargs -0r rm -fv 2>/dev/null");
+if ($tmps) {
+	echo $tmps."\n";
 }
 
 while ($o = \Utils\exec("find '{$_ENV['WOLFPKG_WORKDIR']}' -type d -empty -not -wholename '*/repo.*/*' -print0 | LC_ALL=C sort -zr | xargs -0rn1 rm -rfv 2>/dev/null")) {

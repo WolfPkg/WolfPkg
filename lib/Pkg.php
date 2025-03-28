@@ -2,9 +2,9 @@
 declare(strict_types=1);
 namespace Pkg;
 
-function enum_packages(): array {
+function enum_packages(string $filter = '*'): array {
 	$pkgs = [];
-	$fs = glob('packages/[a-z]*/*/pkg.json5');
+	$fs = glob("packages/[a-z]*/{$filter}/pkg.json5");
 	foreach ($fs as $f) {
 		$f = preg_replace('~^\Q'.$_ENV['WOLFPKG_ROOT'].'\E~', '', $f);
 		$f = preg_replace('~/pkg\.json5$~', '', $f);
@@ -476,7 +476,7 @@ function make_tarball(array $conf, string $rev, string $version = 'long'): array
 	}
 
 	// OS tools should only try to use OS binaries
-	$files = \Utils\split("\n", trim($log->exec_null("grep -srl '^#!/usr/bin/env'; pcregrep --buffer-size=32M -srl '^#!/(usr|usr/local|opt/local)/bin/' *")));
+	$files = \Utils\split("\n", trim($log->exec_null("grep -srl '^#!/usr/bin/env'; grep -Psrl '^#!/(usr|usr/local|opt/local)/bin/' *")));
 	foreach ($files as $f) {
 		$data = file_get_contents($f);
 		if (strpos($data, '#!/usr/local/') !== false) {
@@ -507,6 +507,7 @@ function make_tarball(array $conf, string $rev, string $version = 'long'): array
 	}
 
 	// Replace @APERTIUM_AUTO_VERSION@ with git/svn revision
+	// TODO: Move into hook
 	$files = \Utils\split("\n", trim($log->exec_null("grep -srl '@APERTIUM_AUTO_VERSION@'")));
 	foreach ($files as $f) {
 		$data = file_get_contents($f);
@@ -533,8 +534,12 @@ function make_tarball(array $conf, string $rev, string $version = 'long'): array
 	$log->exec("tar -I 'xz -T0 -4' --owner=0 --group=0 --no-acls --no-selinux --no-xattrs '--mtime={$mtime}' -cf '{$conf['name']}_{$tar['version']}.tar.xz' -T orig.lst");
 	\E\rename($folder, $rev);
 
+	// TODO: A hash with includes/excludes
 	$tar['thash'] = \Utils\sha256_file_b64x("{$conf['name']}_{$tar['version']}.tar.xz");
-	$tar['path'] = $_ENV['WOLFPKG_WORKDIR']."/packages/{$fl}/{$conf['name']}/tars/{$tar['thash']}.tar.xz";
+	$tar['path'] = $_ENV['WOLFPKG_WORKDIR']."/packages/{$fl}/{$conf['name']}/tars/{$tar['thash']}";
+	$log->exec("rm -rf '{$tar['path']}'");
+	$log->exec("cp -a --reflink=auto '{$rev}' '{$tar['path']}'");
+	$tar['path'] .= '.tar.xz';
 	$tar['thash_dots'] = $tar['thash'];
 	$tar['path_dots'] = $tar['path'];
 	\E\rename("{$conf['name']}_{$tar['version']}.tar.xz", $tar['path']);
@@ -550,7 +555,10 @@ function make_tarball(array $conf, string $rev, string $version = 'long'): array
 		\E\rename($folder, $rev);
 
 		$tar['thash_dots'] = \Utils\sha256_file_b64x("{$conf['name']}_{$tar['version_dots']}.tar.xz");
-		$tar['path_dots'] = $_ENV['WOLFPKG_WORKDIR']."/packages/{$fl}/{$conf['name']}/tars/{$tar['thash_dots']}.tar.xz";
+		$tar['path_dots'] = $_ENV['WOLFPKG_WORKDIR']."/packages/{$fl}/{$conf['name']}/tars/{$tar['thash_dots']}";
+		$log->exec("rm -rf '{$tar['path_dots']}'");
+		$log->exec("cp -a --reflink=auto '{$rev}' '{$tar['path_dots']}'");
+		$tar['path_dots'] .= '.tar.xz';
 		\E\rename("{$conf['name']}_{$tar['version_dots']}.tar.xz", $tar['path_dots']);
 	}
 

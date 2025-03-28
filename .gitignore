@@ -1,3 +1,5 @@
+.composer
+.bash_history
 /composer.lock
 /vendor
 *~

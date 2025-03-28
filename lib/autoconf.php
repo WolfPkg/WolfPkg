@@ -31,6 +31,9 @@ $_ENV = \getenv();
 \Utils\putenv('GIT_TERMINAL_PROMPT', '0');
 \Utils\putenv('TZ', 'UTC');
 \Utils\putenv('LC_ALL', 'C.UTF-8');
+\Utils\putenv('DOCKER_BUILDKIT', '1');
+\Utils\putenv('BUILDKIT_PROGRESS', 'plain');
+\Utils\putenv('PROGRESS_NO_TRUNC', '1');
 // GNUPGHOME
 
 foreach ($env as $k => $v) {

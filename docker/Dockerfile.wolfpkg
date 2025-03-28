@@ -1,4 +1,4 @@
-FROM amd64/debian:sid
+FROM amd64/debian:sid AS base
 
 ENV LANG=C.UTF-8 \
 	LC_ALL=C.UTF-8 \
@@ -7,7 +7,7 @@ ENV LANG=C.UTF-8 \
 
 RUN apt-get -qy update && apt-get -qfy --no-install-recommends install apt-utils
 RUN apt-get -qy update && apt-get -qfy --no-install-recommends dist-upgrade
-RUN apt-get -qy update && apt-get -qfy --no-install-recommends install devscripts python3-debian reprepro xz-utils p7zip-full php8.0-cli php8.0-sqlite3 apache2 libapache2-mod-php8.0 pcregrep subversion git composer php8.0-mbstring php8.0-curl unzip
+RUN apt-get -qy update && apt-get -qfy --no-install-recommends install devscripts python3-debian reprepro xz-utils p7zip-full php-cli php-sqlite3 apache2 libapache2-mod-php grep subversion git composer php-mbstring php-curl unzip
 RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 RUN phpdismod calendar ctype exif ffi fileinfo ftp gettext iconv readline shmop sockets sysvmsg sysvsem sysvshm tokenizer
 
@@ -17,6 +17,9 @@ RUN chown {ENV:WOLFPKG_HOST_UID}:{ENV:WOLFPKG_HOST_GID} /opt/wolfpkg /opt/wolfho
 
 VOLUME /opt/wolfpkg
 COPY --chown={ENV:WOLFPKG_HOST_UID}:{ENV:WOLFPKG_HOST_GID} / /opt/wolfhome/
+
+FROM scratch
+COPY --from=base / /
 
 USER {ENV:WOLFPKG_HOST_UID}:{ENV:WOLFPKG_HOST_GID}
 RUN cd /opt/wolfhome/ && composer upgrade

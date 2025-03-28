@@ -15,12 +15,12 @@ if (!$squid) {
 	@mkdir("{$_ENV['WOLFPKG_WORKDIR']}/squid", 0700, true);
 	\E\chdir($_ENV['WOLFPKG_ROOT'].'/docker/squid');
 	\Utils\ppassthru('docker rm -f wolfpkg-squid');
-	\Utils\ppassthru('docker build --pull --squash -t wolfpkg/squid .');
+	\Utils\ppassthru('docker build --pull -t wolfpkg/squid .');
 	\Utils\ppassthru("docker run --name wolfpkg-squid --restart=unless-stopped -d -v '{$_ENV['WOLFPKG_WORKDIR']}/squid:/cache' -p 3124:3128 wolfpkg/squid");
 }
 
 \E\chdir($_ENV['WOLFPKG_ROOT'].'/docker');
 $df = \Utils\configure_file_tmp('Dockerfile.ubuntu-tools');
-\Utils\ppassthru('cat '.escapeshellarg($df).' | docker build --pull --squash -t wolfpkg/ubuntu-tools -');
+\Utils\ppassthru('cat '.escapeshellarg($df).' | docker build --pull -t wolfpkg/ubuntu-tools -');
 $df = \Utils\configure_file_tmp('Dockerfile.debian-tools');
-\Utils\ppassthru('cat '.escapeshellarg($df).' | docker build --pull --squash -t wolfpkg/debian-tools -');
+\Utils\ppassthru('cat '.escapeshellarg($df).' | docker build --pull -t wolfpkg/debian-tools -');

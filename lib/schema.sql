@@ -92,6 +92,7 @@ CREATE TABLE target_packages (
 	p_id INTEGER NOT NULL,
 	t_version TEXT NOT NULL,
 	tp_repo TEXT NOT NULL, -- nightly, release
+	tp_stamp INTEGER NOT NULL DEFAULT (strftime('%s', 'now')),
 	tp_distv INTEGER NOT NULL DEFAULT 1,
 	tp_binaries TEXT NOT NULL,
 	PRIMARY KEY(tg_id, tg_arch, p_id, t_version),

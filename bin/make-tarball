@@ -59,7 +59,7 @@ if (empty($exps)) {
 	exit(-1);
 }
 
-$pkgs = \Pkg\enum_packages();
+$pkgs = \Pkg\enum_packages($package);
 foreach ($pkgs as $path => $pkname) {
 	if (empty($exps[$pkname])) {
 		continue;

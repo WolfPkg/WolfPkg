@@ -210,7 +210,10 @@ function make_debian_base(array $conf, string $version, string $dep_ver = 'head'
 		$log->exec("find '{$folder}' -not -type d | LC_ALL=C sort > orig.lst");
 		$log->exec("tar -I 'xz -T0 -4' --owner=0 --group=0 --no-acls --no-selinux --no-xattrs '--mtime={$mtime}' -cf '{$conf['name']}_{$base['version']}.tar.xz' -T orig.lst");
 		$base['thash'] = \Utils\sha256_file_b64x("{$conf['name']}_{$tar['version']}.tar.xz");
-		$base['path_tar'] = $_ENV['WOLFPKG_WORKDIR']."/packages/{$fl}/{$conf['name']}/tars/{$base['thash']}.tar.xz";
+		$base['path_tar'] = $_ENV['WOLFPKG_WORKDIR']."/packages/{$fl}/{$conf['name']}/tars/{$base['thash']}";
+		$log->exec("rm -rf '{$base['path_tar']}'");
+		$log->exec("cp -a --reflink=auto '{$folder}' '{$base['path_tar']}'");
+		$base['path_tar'] .= '.tar.xz';
 		\E\rename("{$conf['name']}_{$version}.tar.xz", $base['path_tar']);
 	}
 
@@ -226,7 +229,10 @@ function make_debian_base(array $conf, string $version, string $dep_ver = 'head'
 	$log->exec("find debian -not -type d | LC_ALL=C sort > orig.lst");
 	$log->exec("tar -I 'xz -T0 -4' --owner=0 --group=0 --no-acls --no-selinux --no-xattrs '--mtime={$mtime}' -cf debian.tar.xz -T orig.lst");
 	$base['chash'] = \Utils\sha256_file_b64x('debian.tar.xz');
-	$base['path_control'] = $_ENV['WOLFPKG_WORKDIR']."/packages/{$fl}/{$conf['name']}/tars/{$base['chash']}.tar.xz";
+	$base['path_control'] = $_ENV['WOLFPKG_WORKDIR']."/packages/{$fl}/{$conf['name']}/tars/{$base['chash']}";
+	$log->exec("rm -rf '{$base['path_control']}'");
+	$log->exec("cp -a --reflink=auto 'debian' '{$base['path_control']}'");
+	$base['path_control'] .= '.tar.xz';
 	\E\rename('debian.tar.xz', $base['path_control']);
 
 	$db = \Db\get_rw();
@@ -251,10 +257,39 @@ function get_debian_base(array $conf, string $version, string $dep_ver = 'head',
 			'log' => 'Existing base found',
 			'version' => $version,
 			'bundle' => $bundle_ver,
+			'thash' => $tar[0]['b_thash'],
+			'chash' => $tar[0]['b_chash'],
 			'path_tar' => $_ENV['WOLFPKG_WORKDIR']."/packages/{$fl}/{$conf['name']}/tars/{$tar[0]['b_thash']}.tar.xz",
 			'path_control' => $_ENV['WOLFPKG_WORKDIR']."/packages/{$fl}/{$conf['name']}/tars/{$tar[0]['b_chash']}.tar.xz",
 			];
 	}
 
 	return make_debian_base($conf, $version, $bundle_ver);
+}
+
+function queue_debian(array $conf, string $version, string $thash, string $chash, string $tg_version, string $tg_arch, string $bundle_ver = ''): array {
+	$fl = substr($conf['name'], 0, 1).substr($conf['name'], -1);
+	@mkdir($_ENV['WOLFPKG_WORKDIR']."/packages/{$fl}/{$conf['name']}/logs/build", 0711, true);
+	@mkdir($_ENV['WOLFPKG_WORKDIR']."/packages/{$fl}/{$conf['name']}/build", 0711, true);
+
+	$db = \Db\get_rw();
+	$base = $db->prepexec("SELECT b_bundled FROM package_bases WHERE p_id = ? AND t_version = ? AND b_thash = ? AND b_chash = ?", [$conf['id'], $version, $thash, $bhash])->fetchAll();
+	if (empty($base)) {
+		throw new \RuntimeException("No Debian base found");
+	}
+	$bundle = $base[0]['b_bundled'];
+
+	$build = [];
+	$stamp = date('Ymd-His');
+	$build['log'] = $_ENV['WOLFPKG_WORKDIR']."/packages/{$fl}/{$conf['name']}/logs/build/{$stamp}-{$version}.log";
+	$log = new \Utils\Log($build['log']);
+	$log->ln('Version: '.$version);
+	$log->ln('Bundle: '.$bundle);
+	$log->ln('Tarball hash: '.$thash);
+	$log->ln('Control hash: '.$chash);
+
+	$path = $_ENV['WOLFPKG_WORKDIR']."/tmp/{$fl}/{$conf['name']}/{$version}{$bundle}";
+	$log->exec("rm -rf '{$path}'");
+	@mkdir($path, 0711, true);
+	\E\chdir($path);
 }

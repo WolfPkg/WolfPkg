@@ -77,7 +77,7 @@ foreach ($pkgs as $path => $pkname) {
 		continue;
 	}
 
-	echo "Making Debian base for {$pkname} @ {$version}:\n";
-	$base = \Build\make_debian_base($conf, $version, $dep_ver, $bundle);
+	echo "Getting Debian base for {$pkname} @ {$version}:\n";
+	$base = \Build\get_debian_base($conf, $version, $dep_ver, $bundle);
 	echo var_export($base, true), "\n";
 }
